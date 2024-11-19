@@ -1,0 +1,9 @@
+Overview of the Project GALA, is a location-based travel companion application tailored to enhance the travel experience in Cebu Province, Philippines. Currently, travelers—both local and international—rely on fragmented tools for planning, navigating, and discovering attractions. These tools often lack integration, real-time updates, or offline functionality, creating a gap in delivering a seamless, informed, and accessible travel experience.
+
+List of Features • Location-Based Recommendations Personalized suggestions for nearby attractions, dining spots, and cultural experiences within a 5-kilometer radius from the user’s location or based on specific input (address, city, or municipality). • GPS-Based Navigation Real-time navigation services leveraging Google Maps to offer route suggestions and turn-by-turn directions, with offline map functionality for areas with limited or no connectivity. • Offline Access The ability to download maps for specific areas of Cebu Province and access them offline to ensure smooth navigation even without an active internet connection. • User Registration and Profile Management Secure user registration, login, and profile management. This feature will enable saving travel preferences, past itineraries, and personalizing the app experience. • Local Event Calendar A comprehensive calendar showcasing upcoming events in Cebu Province, allowing users to discover and set reminders for festivals, concerts, markets, and other local activities. • Real-Time Travel Alerts Integration of real-time updates on weather, traffic, and local events, keeping travelers informed and helping them adjust their plans accordingly.
+
+Links to UI/UX https://www.figma.com/design/xq6FGED0u2Ml3nwQtCuQbn/GALA?node-id=0-1&t=W8MLqAi19UtKRY8S-1
+
+Links to ERD
+
+Lacanglacang, Nick Carter Magno, Franco Sebastian C. Paden, Arnel P.
