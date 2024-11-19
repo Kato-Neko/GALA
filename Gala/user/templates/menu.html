@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/side_menu.css' %}">
+    <title>Side Menu</title>
+</head>
+
+<body>
+
+    <div class="oval-container">
+        <div class="side-menu">
+            <a href="{% url 'home' %}" class="menu-item">
+                <img src="{% static 'icons/map.png' %}" alt="Home" class="icon">
+            </a>
+            <a href="#" class="menu-item">
+                <img src="{% static 'icons/calendar.png' %}" alt="Calendar" class="icon">
+            </a>
+            <a href="#" class="menu-item">
+                <img src="{% static 'icons/search.png' %}" alt="Search" class="icon">
+            </a>
+            <div class="menu-item">
+                <img src="{% static 'icons/settings.png' %}" alt="Settings" class="icon">
+                <div class="dropdown">
+                    <a href="{% url 'account_management' %}" class="dropdown-item">Manage Account</a>
+                    <a href="{% url 'login' %}" class="dropdown-item">Log Out</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const settingsMenu = document.querySelector('.menu-item:last-child');
+        const dropdown = settingsMenu.querySelector('.dropdown');
+
+        settingsMenu.addEventListener('click', function (event) {
+            event.stopPropagation();
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', function () {
+            dropdown.style.display = 'none';
+        });
+    });
+</script>
+
+</html>

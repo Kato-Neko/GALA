@@ -1,0 +1,202 @@
+{% include 'menu.html' %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Management</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #e9ecef;
+            color: #333;
+        }
+
+        /* Container Styling */
+        .container {
+            margin-top: 80px;
+            max-width: 700px;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Profile Picture Section */
+        .profile-picture-section {
+            flex: 1;
+            text-align: center;
+            padding-right: 20px;
+        }
+
+        .profile-picture-section img {
+            width: 100%;
+            max-width: 150px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Form Section */
+        .form-section {
+            flex: 2;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3178f0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-control {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: #3178f0;
+            box-shadow: none;
+        }
+
+        .btn-primary {
+            background-color: #3178f0;
+            border: none;
+            border-radius: 8px;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #225db0;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border: none;
+            border-radius: 8px;
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #28a745;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+            animation: fadeIn 0.5s, fadeOut 0.5s 9.5s;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                bottom: 10px;
+            }
+
+            to {
+                opacity: 1;
+                bottom: 20px;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                bottom: 20px;
+            }
+
+            to {
+                opacity: 0;
+                bottom: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Profile Picture Section -->
+        <div class="profile-picture-section">
+            {% if user.profile.profile_picture %}
+            <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture">
+            {% else %}
+            <img src="https://via.placeholder.com/150" alt="Default Profile Picture">
+            {% endif %}
+
+        </div>
+
+        <!-- Form Section -->
+        <div class="form-section">
+            <h2>Account Management</h2>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" name="username" id="username" class="form-control" value="{{ user.username }}">
+                </div>
+                <div class="form-group">
+                    <label for="first_name">First Name:</label>
+                    <input type="text" name="first_name" id="first_name" class="form-control"
+                        value="{{ user.first_name }}">
+                </div>
+                <div class="form-group">
+                    <label for="last_name">Last Name:</label>
+                    <input type="text" name="last_name" id="last_name" class="form-control"
+                        value="{{ user.last_name }}">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" name="password" id="password" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="profile_picture">Profile Picture:</label>
+                    <input type="file" name="profile_picture" id="profile_picture" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary">Update</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification {% if success %}show{% endif %}" id="notification">
+        Your account has been updated successfully.
+    </div>
+
+    <script>
+        // Show the notification if it exists
+        if (document.getElementById('notification').classList.contains('show')) {
+            setTimeout(function () {
+                document.getElementById('notification').classList.remove('show');
+            }, 10000); // Hide after 10 seconds 
+        }
+    </script>
+</body>
+
+</html>
