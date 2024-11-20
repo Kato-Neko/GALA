@@ -6,10 +6,12 @@ from django.conf import settings
 
 urlpatterns = [
     # Home page
+    path('', views.home, name='home'),
     path('home/', views.home, name='home'),
 
     # Login and signup views
     path('login/', views.custom_login_view, name='login'),
+    path('logout/', views.custom_logout, name='logout'),
     path('signup/', views.signup_view, name='signup'),
 
     # Account management (with login required decorator)

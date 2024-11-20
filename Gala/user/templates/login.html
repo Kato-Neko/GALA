@@ -5,43 +5,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FFC107',
+                        dark: '#1E293B',
+                    },
+                },
+            },
+        };
+    </script>
 </head>
 
 <body>
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <h2 class="text-center">Login</h2>
 
-                <!-- Display success or error messages -->
-                {% if messages %}
+    <!-- Login Dialog (Initially Hidden) -->
+    <div class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+        <div class="bg-gray-800 p-8 rounded-xl max-w-sm w-full transform transition-all duration-300 ease-out">
+            <div class="mb-6 text-center">
+                <img src="{% static 'icons/logo.png' %}" alt="Logo" width="120" class="mx-auto mb-4" />
+                <h2 class="text-2xl font-bold text-white">Login</h2>
+            </div>
+
+            <!-- Display success or error messages -->
+            {% if messages %}
+            <div class="mb-4">
                 {% for message in messages %}
-                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">
+                <div
+                    class="rounded-md px-4 py-3 text-sm text-white 
+                    {% if message.tags == 'success' %}bg-green-600{% elif message.tags == 'error' %}bg-red-600{% else %}bg-blue-600{% endif %}">
                     {{ message }}
                 </div>
                 {% endfor %}
-                {% endif %}
-
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="username">Username:</label>
-                        <input type="text" id="username" name="username" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password:</label>
-                        <input type="password" id="password" name="password" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Login</button>
-                </form>
-
-                <p class="text-center mt-3">
-                    <a href="{% url 'password_reset' %}">Forgot your password?</a>
-                </p>
             </div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="username" class="text-sm text-gray-200">Username:</label>
+                    <input id="username" name="username" type="text"
+                        class="w-full bg-gray-700 text-gray-200 px-4 py-2 rounded-lg" required />
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="text-sm text-gray-200">Password:</label>
+                    <input id="password" name="password" type="password"
+                        class="w-full bg-gray-700 text-gray-200 px-4 py-2 rounded-lg" required />
+                </div>
+                <button type="submit" class="w-full bg-primary text-white px-6 py-2 rounded-lg mt-4">Login</button>
+            </form>
+
+            <!-- Signup link -->
+            <p class="mt-6 text-center text-sm text-gray-400">
+                Haven't made an account?
+                <a href="{% url 'signup' %}" class="text-primary hover:underline">SIGN UP here</a> .
+            </p>
         </div>
     </div>
+
 </body>
 
 </html>

@@ -1,71 +1,86 @@
-body,
-html {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  height: 100%;
-}
-
-.oval-container {
+.btm-nav {
   position: fixed;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: #1560bd;
-  border-radius: 50px;
-  padding: 10px;
-  z-index: 1000;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  background-color: #2d2d2d;
+  padding: 10px 0;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  border-top-left-radius: 35px; /* Adjust the size to your preference */
+  border-top-right-radius: 35px;
 }
 
-.side-menu {
+.btm-nav button {
+  background: none;
+  border: none;
+  padding: 5px;
+  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
+  color: #fff;
+  transition: all 0.3s ease;
 }
 
-.menu-item {
-  position: relative;
-  background-color: #bedbff;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background-color 0.3s;
-  text-decoration: none;
+.btm-nav button:hover {
+  color: #4caf50; /* Change to your preferred hover color */
 }
 
-.menu-item:hover {
-  background-color: #06216f;
+.btm-nav button.active {
+  color: #4caf50; /* Active color */
 }
 
-.icon {
-  width: 30px;
-  height: 30px;
+.btm-nav svg {
+  width: 100%; /* Allow the icons to scale with their container */
+  height: 100%; /* Allow the icons to scale with their container */
+}
+.btm-nav-label {
+  font-size: 12px;
+  margin-top: 5px;
 }
 
-.dropdown {
-  display: none;
-  position: absolute;
-  top: 50%;
-  left: 50px;
-  background-color: #4d7cb6;
-  border-radius: 5px;
-  padding: 10px;
-  z-index: 1001;
-  white-space: nowrap;
+.btm-nav button:focus {
+  outline: none;
 }
 
-.dropdown-item {
-  color: white;
-  text-decoration: none;
-  display: block;
-  padding: 5px 10px;
-  transition: background-color 0.3s;
+/* Make the bottom navigation responsive */
+@media (max-width: 768px) {
+  .btm-nav {
+    padding: 8px 0;
+  }
+
+  .btm-nav button {
+    padding: 10px;
+  }
+
+  .btm-nav-label {
+    font-size: 10px;
+  }
 }
 
-.dropdown-item:hover {
-  background-color: #06216f;
+@media (min-width: 768px) {
+  .btm-nav {
+    padding: 12px 0;
+  }
+
+  .btm-nav button {
+    background: none;
+    border: none;
+    padding: 5px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #fff;
+    transition: all 0.3s ease;
+    width: 40px; /* Adjust button width to control icon size */
+    height: 40px; /* Adjust button height to control icon size */
+  }
+
+  .btm-nav-label {
+    font-size: 14px;
+  }
 }
