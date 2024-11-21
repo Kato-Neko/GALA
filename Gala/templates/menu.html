@@ -1,0 +1,154 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GALA Unified Layout</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FFC107',
+                        dark: '#00386d', /* Unified color */
+                    },
+                },
+            },
+        };
+    </script>
+
+    <!-- Include your custom CSS from the static folder -->
+    <link rel="stylesheet" href="{% static 'css/side_menu.css' %}">
+</head>
+
+<body class="bg-gray-100" data-user-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
+
+    <!-- Top Navbar -->
+    <div class="navbar bg-dark shadow-md">
+        <div class="flex items-center space-x-4 w-full p-20">
+            <!-- GALA Title -->
+            <a class="text-xl font-bold text-white">GALA</a>
+
+            <!-- Search Bar (centered using flex-grow) -->
+            <div class="form-control flex-grow">
+                <input type="text" placeholder="Search" class="input input-bordered w-full" />
+            </div>
+
+            <!-- User Info (Profile Picture and Username, pushed to the right) -->
+            <div class="flex items-center gap-3 text-white">
+                <div class="avatar w-8 h-8 rounded-full overflow-hidden bg-gray-200">
+                    <!-- If the user is authenticated and has a profile picture, show it; else show an empty circle -->
+                    {% if user.is_authenticated and user.profile.profile_picture %}
+                    <img alt="Profile Picture" src="{{ user.profile.profile_picture.url }}" class="object-cover" />
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center">
+                        <span class="text-xl font-medium text-gray-600">?</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <span class="text-sm font-medium">
+                    {% if user.is_authenticated %}
+                    {{ user.username }}
+                    {% else %}
+                    Anonymous
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Menu -->
+    <div class="btm-nav h-16 bg-dark text-white">
+        <!-- Calendar Button -->
+        <button>
+            <svg class="w-10 h-10" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                viewBox="0 0 24 24">
+                <path fill-rule="evenodd"
+                    d="M18 5.05h1a2 2 0 0 1 2 2v2H3v-2a2 2 0 0 1 2-2h1v-1a1 1 0 1 1 2 0v1h3v-1a1 1 0 1 1 2 0v1h3v-1a1 1 0 1 1 2 0v1Zm-15 6v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8H3ZM11 18a1 1 0 1 0 2 0v-1h1a1 1 0 1 0 0-2h-1v-1a1 1 0 1 0-2 0v1h-1a1 1 0 1 0 0 2h1v1Z"
+                    clip-rule="evenodd" />
+            </svg>
+        </button>
+
+        <!--Reminder Button-->
+        <button>
+            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd"
+                    d="M12 2c-.791 0-1.55.314-2.11.874l-.893.893a.985.985 0 0 1-.696.288H7.04A2.984 2.984 0 0 0 4.055 7.04v1.262a.986.986 0 0 1-.288.696l-.893.893a2.984 2.984 0 0 0 0 4.22l.893.893a.985.985 0 0 1 .288.696v1.262a2.984 2.984 0 0 0 2.984 2.984h1.262c.261 0 .512.104.696.288l.893.893a2.984 2.984 0 0 0 4.22 0l.893-.893a.985.985 0 0 1 .696-.288h1.262a2.984 2.984 0 0 0 2.984-2.984V15.7c0-.261.104-.512.288-.696l.893-.893a2.984 2.984 0 0 0 0-4.22l-.893-.893a.985.985 0 0 1-.288-.696V7.04a2.984 2.984 0 0 0-2.984-2.984h-1.262a.985.985 0 0 1-.696-.288l-.893-.893A2.984 2.984 0 0 0 12 2Zm3.683 7.73a1 1 0 1 0-1.414-1.413l-4.253 4.253-1.277-1.277a1 1 0 0 0-1.415 1.414l1.985 1.984a1 1 0 0 0 1.414 0l4.96-4.96Z"
+                    clip-rule="evenodd" />
+            </svg>
+        </button>
+
+        <!-- Home Button -->
+        <a href="/" class="flex justify-center items-center">
+            <button>
+                <svg class="w-15 h-15 text-gray-800 dark:text-white" aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd"
+                        d="M11.293 3.293a1 1 0 0 1 1.414 0l6 6 2 2a1 1 0 0 1-1.414 1.414L19 12.414V19a2 2 0 0 1-2 2h-3a1 1 0 0 1-1-1v-3h-2v3a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2v-6.586l-.293.293a1 1 0 0 1-1.414-1.414l2-2 6-6Z"
+                        clip-rule="evenodd" />
+                </svg>
+            </button>
+        </a>
+
+        <!-- Saved Button -->
+        <button>
+            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                    d="M7.833 2c-.507 0-.98.216-1.318.576A1.92 1.92 0 0 0 6 3.89V21a1 1 0 0 0 1.625.78L12 18.28l4.375 3.5A1 1 0 0 0 18 21V3.889c0-.481-.178-.954-.515-1.313A1.808 1.808 0 0 0 16.167 2H7.833Z" />
+            </svg>
+        </button>
+
+        <!-- Settings Dropdown -->
+        <div class="group relative">
+            <button onclick="handleSettingsClick()">
+                <svg class="w-10 h-10 text-gray-800 dark:text-white" aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd"
+                        d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z"
+                        clip-rule="evenodd" />
+                </svg>
+            </button>
+            {% if user.is_authenticated %}
+            <ul tabindex="0"
+                class="dropdown-content menu bg-dark text-white rounded-t-lg z-50 w-52 p-3 shadow-lg absolute bottom-[calc(100%+1rem)] right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <li><a href="/account_management" class="hover:p-2 rounded-md">Manage Account</a></li>
+                <li><a href="/logout" class="hover:p-2 rounded-md">Log Out</a></li>
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Include the login.html modal -->
+    {% include "login.html" %}
+
+    <!-- JavaScript to handle modal -->
+    <script>
+        function handleSettingsClick() {
+            // Get user authentication status from the data attribute
+            const isAuthenticated = document.body.dataset.userAuthenticated === "true";
+
+            if (!isAuthenticated) {
+                // Show login modal if not authenticated
+                const loginModal = document.getElementById('loginModal');
+                loginModal.classList.remove('hidden');
+                loginModal.classList.add('flex');
+            }
+        }
+
+        function closeModal() {
+            const loginModal = document.getElementById('loginModal');
+            loginModal.classList.add('hidden');
+            loginModal.classList.remove('flex');
+        }
+    </script>
+</body>
+
+</html>

@@ -1,202 +1,106 @@
-{% include 'menu.html' %}
+{% extends 'base.html' %}
+{% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}
+Account Management
+{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Management</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        /* Global Styles */
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #e9ecef;
-            color: #333;
-        }
+{% block content %}
+<!-- Page Container -->
+<div class="container mx-auto mt-20 p-6 max-w-4xl bg-white rounded-xl shadow-lg">
+    <!-- Header Section -->
+    <h2 class="text-2xl font-bold text-primary text-center mb-6">Account Management</h2>
 
-        /* Container Styling */
-        .container {
-            margin-top: 80px;
-            max-width: 700px;
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease-in-out;
-            display: flex;
-            align-items: center;
-        }
-
-        /* Profile Picture Section */
-        .profile-picture-section {
-            flex: 1;
-            text-align: center;
-            padding-right: 20px;
-        }
-
-        .profile-picture-section img {
-            width: 100%;
-            max-width: 150px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Form Section */
-        .form-section {
-            flex: 2;
-        }
-
-        h2 {
-            font-size: 24px;
-            font-weight: bold;
-            color: #3178f0;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .form-control {
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            transition: border-color 0.2s;
-        }
-
-        .form-control:focus {
-            border-color: #3178f0;
-            box-shadow: none;
-        }
-
-        .btn-primary {
-            background-color: #3178f0;
-            border: none;
-            border-radius: 8px;
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background-color: #225db0;
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            border: none;
-            border-radius: 8px;
-            width: 100%;
-            margin-top: 10px;
-            padding: 10px;
-            font-size: 16px;
-            color: #fff;
-        }
-
-        .btn-secondary:hover {
-            background-color: #5a6268;
-        }
-
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background-color: #28a745;
-            color: #fff;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            display: none;
-            animation: fadeIn 0.5s, fadeOut 0.5s 9.5s;
-            z-index: 1000;
-        }
-
-        .notification.show {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                bottom: 10px;
-            }
-
-            to {
-                opacity: 1;
-                bottom: 20px;
-            }
-        }
-
-        @keyframes fadeOut {
-            from {
-                opacity: 1;
-                bottom: 20px;
-            }
-
-            to {
-                opacity: 0;
-                bottom: 10px;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
+    <!-- Content Wrapper -->
+    <div class="flex flex-col md:flex-row items-center">
         <!-- Profile Picture Section -->
-        <div class="profile-picture-section">
+        <div class="flex justify-center md:w-1/3 mb-6 md:mb-0">
             {% if user.profile.profile_picture %}
-            <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture">
+            <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture"
+                class="w-40 h-40 rounded-lg shadow-md object-cover">
             {% else %}
-            <img src="https://via.placeholder.com/150" alt="Default Profile Picture">
+            <img src="{% static 'images/default_profile.png' %}" alt="Default Profile Picture"
+                class="w-40 h-40 rounded-lg shadow-md object-cover">
             {% endif %}
-
         </div>
 
         <!-- Form Section -->
-        <div class="form-section">
-            <h2>Account Management</h2>
-            <form method="post" enctype="multipart/form-data">
+        <div class="flex-1 md:ml-6">
+            <form method="post" enctype="multipart/form-data" class="space-y-4">
                 {% csrf_token %}
-                <div class="form-group">
-                    <label for="username">Username:</label>
-                    <input type="text" name="username" id="username" class="form-control" value="{{ user.username }}">
+                <!-- Username -->
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">Username:</label>
+                    <input type="text" name="username" id="username"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary"
+                        value="{{ user.username }}">
                 </div>
-                <div class="form-group">
-                    <label for="first_name">First Name:</label>
-                    <input type="text" name="first_name" id="first_name" class="form-control"
+                <!-- First Name -->
+                <div>
+                    <label for="first_name" class="block text-sm font-medium text-gray-700">First Name:</label>
+                    <input type="text" name="first_name" id="first_name"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary"
                         value="{{ user.first_name }}">
                 </div>
-                <div class="form-group">
-                    <label for="last_name">Last Name:</label>
-                    <input type="text" name="last_name" id="last_name" class="form-control"
+                <!-- Last Name -->
+                <div>
+                    <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name:</label>
+                    <input type="text" name="last_name" id="last_name"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary"
                         value="{{ user.last_name }}">
                 </div>
-                <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" name="password" id="password" class="form-control">
+                <!-- Password -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password:</label>
+                    <input type="password" name="password" id="password"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary">
                 </div>
-                <div class="form-group">
-                    <label for="profile_picture">Profile Picture:</label>
-                    <input type="file" name="profile_picture" id="profile_picture" class="form-control">
+                <!-- Profile Picture -->
+                <div>
+                    <label for="profile_picture" class="block text-sm font-medium text-gray-700">Profile
+                        Picture:</label>
+                    <input type="file" name="profile_picture" id="profile_picture"
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary">
                 </div>
-                <button type="submit" class="btn btn-primary">Update</button>
+                <!-- Submit Button -->
+                <div>
+                    <button type="submit"
+                        class="w-full py-2 px-4 bg-primary text-white rounded-lg font-medium hover:bg-blue-700 transition">
+                        Update
+                    </button>
+                </div>
             </form>
         </div>
     </div>
+</div>
 
-    <!-- Notification -->
-    <div class="notification {% if success %}show{% endif %}" id="notification">
-        Your account has been updated successfully.
-    </div>
+<!-- Notification -->
+{% if success %}
+<div class="fixed bottom-4 left-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-fade-in-out">
+    Your account has been updated successfully.
+</div>
+{% endif %}
 
-    <script>
-        // Show the notification if it exists
-        if (document.getElementById('notification').classList.contains('show')) {
-            setTimeout(function () {
-                document.getElementById('notification').classList.remove('show');
-            }, 10000); // Hide after 10 seconds 
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fade-in-out {
+
+        0%,
+        100% {
+            opacity: 0;
+            transform: translateY(10px);
         }
-    </script>
-</body>
 
-</html>
+        50% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in-out {
+        animation: fade-in-out 3s ease-in-out forwards;
+    }
+</style>
+{% endblock %}

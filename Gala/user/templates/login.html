@@ -1,71 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
+{% load static %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#FFC107',
-                        dark: '#1E293B',
-                    },
-                },
-            },
-        };
-    </script>
-</head>
-
-<body>
-
-    <!-- Login Dialog (Initially Hidden) -->
-    <div class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
-        <div class="bg-gray-800 p-8 rounded-xl max-w-sm w-full transform transition-all duration-300 ease-out">
-            <div class="mb-6 text-center">
-                <img src="{% static 'icons/logo.png' %}" alt="Logo" width="120" class="mx-auto mb-4" />
-                <h2 class="text-2xl font-bold text-white">Login</h2>
-            </div>
-
-            <!-- Display success or error messages -->
-            {% if messages %}
-            <div class="mb-4">
-                {% for message in messages %}
-                <div
-                    class="rounded-md px-4 py-3 text-sm text-white 
-                    {% if message.tags == 'success' %}bg-green-600{% elif message.tags == 'error' %}bg-red-600{% else %}bg-blue-600{% endif %}">
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-            <form method="post">
-                {% csrf_token %}
-                <div class="mb-4">
-                    <label for="username" class="text-sm text-gray-200">Username:</label>
-                    <input id="username" name="username" type="text"
-                        class="w-full bg-gray-700 text-gray-200 px-4 py-2 rounded-lg" required />
-                </div>
-                <div class="mb-4">
-                    <label for="password" class="text-sm text-gray-200">Password:</label>
-                    <input id="password" name="password" type="password"
-                        class="w-full bg-gray-700 text-gray-200 px-4 py-2 rounded-lg" required />
-                </div>
-                <button type="submit" class="w-full bg-primary text-white px-6 py-2 rounded-lg mt-4">Login</button>
-            </form>
-
-            <!-- Signup link -->
-            <p class="mt-6 text-center text-sm text-gray-400">
-                Haven't made an account?
-                <a href="{% url 'signup' %}" class="text-primary hover:underline">SIGN UP here</a> .
-            </p>
+<div id="loginModal" class="hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-[9999]">
+    <div class="bg-gray-800 p-8 rounded-xl max-w-sm w-full transform transition-all duration-300 ease-out">
+        <div class="mb-6 text-center">
+            <img src="{% static 'icons/logo.png' %}" alt="Logo" width="120" class="mx-auto mb-4" />
+            <h2 class="text-2xl font-bold text-white">Login</h2>
         </div>
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="username" class="text-sm text-gray-200">Username:</label>
+                <input id="username" name="username" type="text"
+                    class="w-full bg-gray-700 text-gray-200 px-4 py-2 rounded-lg" required />
+            </div>
+            <div class="mb-4">
+                <label for="password" class="text-sm text-gray-200">Password:</label>
+                <input id="password" name="password" type="password"
+                    class="w-full bg-gray-700 text-gray-200 px-4 py-2 rounded-lg" required />
+            </div>
+            <button type="submit" class="w-full bg-primary text-white px-6 py-2 rounded-lg mt-4">Login</button>
+        </form>
+        <button onclick="closeModal()" class="absolute top-2 right-2 text-white text-xl">&times;</button>
     </div>
-
-</body>
-
-</html>
+</div>

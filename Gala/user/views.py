@@ -16,7 +16,7 @@ def custom_login_view(request):
         if user is not None:
             login(request, user)
             messages.success(request, 'Welcome back, {}!'.format(user.username))
-            next_url = request.POST.get('next') or request.GET.get('next') or '/home/'
+            next_url = request.POST.get('next') or request.GET.get('next') or '/'
             return redirect(next_url)
         else:
             messages.error(request, 'Invalid username or password. Please try again.')
