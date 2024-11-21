@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/side_menu.css' %}">
+    <title>Recommendations Page</title>
+</head>
+
+<body>
+
+    <div class="oval-container">
+        <div class="side-menu">
+            <a href="#" class="menu-item">
+                <img src="{% static 'icons/map.png' %}" alt="Home" class="icon">
+            </a>
+            <a href="#" class="menu-item">
+                <img src="{% static 'icons/calendar.png' %}" alt="Calendar" class="icon">
+            </a>
+            <a href="#" class="menu-item">
+                <img src="{% static 'icons/search.png' %}" alt="Search" class="icon">
+            </a>
+            <div class="menu-item"> <!-- Changed from <a> to <div> -->
+                <img src="{% static 'icons/settings.png' %}" alt="Settings" class="icon">
+                <div class="dropdown">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const settingsMenu = document.querySelector('.menu-item:last-child'); // Select the last menu item
+        const dropdown = settingsMenu.querySelector('.dropdown');
+
+        settingsMenu.addEventListener('click', function (event) {
+            event.stopPropagation(); // Prevent event bubbling
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Hide dropdown if clicking outside
+        document.addEventListener('click', function () {
+            dropdown.style.display = 'none';
+        });
+    });
+</script>
+
+</html>
