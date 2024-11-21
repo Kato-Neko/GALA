@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reminder List</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-top: 20px;
+            font-size: 2rem;
+        }
+
+        /* Calendar Style */
+        .calendar-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            max-width: 900px;
+            margin: 40px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-navigation {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            cursor: pointer;
+            padding: 10px;
+            user-select: none;
+            transition: color 0.3s ease;
+        }
+
+        .calendar-navigation:hover {
+            color: #0056b3;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .calendar .day {
+            padding: 15px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .calendar .day:hover {
+            background-color: #e0e0e0;
+        }
+
+        .calendar .day-of-week {
+            font-weight: bold;
+            color: #555;
+            padding: 10px;
+        }
+
+        .calendar .sunday {
+            color: #d9534f;
+        }
+
+        /* Modal Style */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            width: 400px;
+            max-width: 90%;
+        }
+        .modal.active {
+            display: block;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .overlay.active {
+            display: block;
+        }
+
+        /* Form and Inputs */
+        .modal input[type="text"], .modal input[type="time"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .modal button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        .modal button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Close Button */
+        .modal .close-btn {
+            background-color: #f44336;
+            color: white;
+            border-radius: 5px;
+            padding: 8px 15px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            display: block;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .modal .close-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Month Title Style */
+        #calendar-title {
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Navigation Buttons */
+        .calendar-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            margin-bottom: 20px;
+            max-width: 800px;
+        }
+        /* Reminder List */
+        .reminder-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+
+        .reminder-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .reminder-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .reminder-info h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #007bff;
+        }
+
+        .reminder-info p {
+            margin: 5px 0;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .reminder-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            text-decoration: none;
+            padding: 8px 15px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .edit-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+
+        .edit-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+        }
+
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Calendar</h1>
+
+    <div id="calendar-title"></div>
+    <div class="calendar-container">
+        <span class="calendar-navigation" id="prev-month" onclick="navigateMonth(-1)">&#9664;</span>
+
+        <div class="calendar" id="calendar"></div>
+
+        <span class="calendar-navigation" id="next-month" onclick="navigateMonth(1)">&#9654;</span>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="modal" id="reminder-modal">
+        <h2>Create Reminder</h2>
+        <form method="post" action="{% url 'reminder-create' %}" id="reminder-form">
+            {% csrf_token %}
+            <label for="description">Description:</label>
+            <input type="text" name="description" required><br><br>
+
+            <label for="start_time">Start Time:</label>
+            <input type="time" name="start_time" required><br><br>
+
+            <label for="end_time">End Time:</label>
+            <input type="time" name="end_time" required><br><br>
+
+            <input type="hidden" name="date" id="selected-date">
+
+            <button type="submit">Save</button>
+        </form>
+        <button class="close-btn" onclick="closeModal()">Close</button>
+    </div>
+
+    <ul class="reminder-list">
+        {% for reminder in object_list %}
+            <li class="reminder-card">
+                <div class="reminder-info">
+                    <h3>{{ reminder.description }}</h3>
+                    <p>Date: {{ reminder.date }}</p>
+                    <p>Time: {{ reminder.start_time }} - {{ reminder.end_time }}</p>
+                </div>
+                <div class="reminder-actions">
+                    <a href="{% url 'reminder-update' reminder.pk %}" class="action-btn edit-btn">Edit</a>
+                    <a href="{% url 'reminder-delete' reminder.pk %}" class="action-btn delete-btn">Delete</a>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+    
+
+    <script>
+        let currentMonth = new Date().getMonth(); 
+        let currentYear = new Date().getFullYear(); 
+        const currentDate = new Date();
+
+        function generateCalendar(month, year) {
+            const calendarElement = document.getElementById('calendar');
+            const calendarTitle = document.getElementById('calendar-title');
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const totalDays = lastDay.getDate();
+            const startDay = firstDay.getDay();
+
+            const monthNames = [
+                'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            calendarTitle.textContent = `${monthNames[month]} ${year}`;
+
+            calendarElement.innerHTML = '';
+
+            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            daysOfWeek.forEach(day => {
+                const dayElement = document.createElement('div');
+                dayElement.textContent = day;
+                dayElement.classList.add('day-of-week');
+                calendarElement.appendChild(dayElement);
+            });
+
+            for (let i = 0; i < startDay; i++) {
+                const emptyCell = document.createElement('div');
+                calendarElement.appendChild(emptyCell);
+            }
+
+            for (let day = 1; day <= totalDays; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.textContent = day;
+                dayElement.classList.add('day');
+
+                if (new Date(year, month, day).getDay() === 0) {
+                    dayElement.classList.add('sunday');
+                }
+
+            const dateToCheck = new Date(year, month, day);
+                if (dateToCheck < currentDate.setHours(0, 0, 0, 0)) {
+                dayElement.classList.add('disabled');
+                dayElement.style.pointerEvents = 'none'; 
+                }
+
+                dayElement.onclick = function() {
+                    openModal(year, month, day);
+                };
+
+                calendarElement.appendChild(dayElement);
+            }
+        }
+
+        function navigateMonth(direction) {
+            currentMonth += direction;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            generateCalendar(currentMonth, currentYear);
+        }
+
+        function openModal(year, month, day) {
+            const formattedDate = `${year}-${month + 1}-${day}`;
+            document.getElementById('selected-date').value = formattedDate;
+            document.getElementById('reminder-modal').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('reminder-modal').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        generateCalendar(currentMonth, currentYear);
+    </script>
+</body>
+</html>
