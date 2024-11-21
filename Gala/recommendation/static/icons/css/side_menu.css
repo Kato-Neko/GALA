@@ -1,0 +1,72 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  height: 100%;
+}
+
+.oval-container {
+  position: fixed;
+  left: 10px; /* Aligns it to the left */
+  top: 50%; /* Centers it vertically */
+  transform: translateY(-50%); /* Adjusts the vertical alignment */
+  background-color: #1560bd; /* Background color of the oval */
+  border-radius: 50px; /* Creates the oval shape */
+  padding: 10px; /* Space inside the oval */
+  z-index: 1000;
+}
+
+.side-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.menu-item {
+  position: relative; /* Position relative to enable absolute positioning of dropdown */
+  background-color: #4d7cb6;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+  text-decoration: none;
+}
+
+.menu-item:hover {
+  background-color: #06216f;
+}
+
+.icon {
+  width: 30px;
+  height: 30px;
+}
+
+/* Dropdown styles */
+.dropdown {
+  display: none; /* Initially hidden */
+  position: absolute; /* Position it absolutely within the menu item */
+  top: 50%; /* Center it vertically relative to the icon */
+  left: 50px; /* Adjust this value to move it to the right of the icon */
+  background-color: #4d7cb6; /* Match the button background */
+  border-radius: 5px; /* Slightly round corners */
+  padding: 10px; /* Space inside dropdown */
+  z-index: 1001; /* Ensure it appears above the oval */
+  white-space: nowrap; /* Prevents text from wrapping */
+}
+
+.dropdown-item {
+  color: white;
+  text-decoration: none;
+  display: block; /* Ensures items stack vertically */
+  padding: 5px 10px; /* Space for dropdown items */
+  transition: background-color 0.3s;
+}
+
+.dropdown-item:hover {
+  background-color: #06216f; /* Darker on hover */
+}
