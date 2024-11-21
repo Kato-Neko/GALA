@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reminder List</title>
+    <script src="https://cdn.tailwindcss.com"></script> <!-- Ensure Tailwind CSS is included -->
+</head>
+
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+    <h1 class="text-3xl font-bold text-center text-blue-600 my-10">Calendar</h1>
+
+    <!-- Calendar Container -->
+    <div class="flex justify-center mb-6">
+        <span id="prev-month" onclick="navigateMonth(-1)"
+            class="cursor-pointer text-2xl font-bold text-blue-600 hover:text-blue-800 p-4">
+            &#9664;
+        </span>
+
+        <div id="calendar" class="grid grid-cols-7 gap-4 p-4 border border-gray-300 rounded-lg bg-white shadow-md">
+        </div>
+
+        <span id="next-month" onclick="navigateMonth(1)"
+            class="cursor-pointer text-2xl font-bold text-blue-600 hover:text-blue-800 p-4">
+            &#9654;
+        </span>
+    </div>
+
+    <div class="overlay fixed top-0 left-0 w-full h-full bg-black opacity-50 hidden" id="overlay"></div>
+
+    <div class="modal fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg w-96 max-w-full hidden"
+        id="reminder-modal">
+        <h2 class="text-xl font-bold mb-4">Create Reminder</h2>
+        <form method="post" action="{% url 'reminder-create' %}" id="reminder-form">
+            {% csrf_token %}
+            <label for="description" class="block text-sm font-medium text-gray-700">Description:</label>
+            <input type="text" name="description" required
+                class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+
+            <label for="start_time" class="block text-sm font-medium text-gray-700">Start Time:</label>
+            <input type="time" name="start_time" required
+                class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+
+            <label for="end_time" class="block text-sm font-medium text-gray-700">End Time:</label>
+            <input type="time" name="end_time" required
+                class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+
+            <input type="hidden" name="date" id="selected-date">
+
+            <button type="submit"
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">Save</button>
+        </form>
+        <button onclick="closeModal()"
+            class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 mt-4 transition duration-200">
+            Close
+        </button>
+    </div>
+
+    <ul class="reminder-list max-w-lg mx-auto mt-6 space-y-4">
+        {% for reminder in object_list %}
+        <li class="bg-white p-4 rounded-lg shadow-md flex justify-between items-center">
+            <div class="reminder-info">
+                <h3 class="text-lg font-semibold text-blue-600">{{ reminder.description }}</h3>
+                <p class="text-sm text-gray-600">Date: {{ reminder.date }}</p>
+                <p class="text-sm text-gray-600">Time: {{ reminder.start_time }} - {{ reminder.end_time }}</p>
+            </div>
+            <div class="reminder-actions flex gap-2">
+                <a href="{% url 'reminder-update' reminder.pk %}"
+                    class="text-white bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded-lg transition duration-200">
+                    Edit
+                </a>
+                <a href="{% url'reminder-delete' reminder.pk %}"
+                    class="text-white bg-red-600 hover:bg-red-700 py-2 px-4 rounded-lg transition duration-200">
+                    Delete
+                </a>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <script>
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        const currentDate = new Date();
+
+        // Generate Calendar Function
+        function generateCalendar(month, year) {
+            const calendarElement = document.getElementById('calendar');
+            const calendarTitle = document.getElementById('calendar-title');
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const totalDays = lastDay.getDate();
+            const startDay = firstDay.getDay();
+
+            const monthNames = [
+                'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            calendarTitle.textContent = `${monthNames[month]} ${year}`;
+
+            calendarElement.innerHTML = ''; // Clear existing calendar
+
+            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            daysOfWeek.forEach(day => {
+                const dayElement = document.createElement('div');
+                dayElement.textContent = day;
+                dayElement.classList.add('font-bold', 'text-sm', 'text-gray-700');
+                calendarElement.appendChild(dayElement);
+            });
+
+            // Create empty cells before the first day
+            for (let i = 0; i < startDay; i++) {
+                const emptyCell = document.createElement('div');
+                calendarElement.appendChild(emptyCell);
+            }
+
+            // Generate days for the month
+            for (let day = 1; day <= totalDays; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.textContent = day;
+                dayElement.classList.add('cursor-pointer', 'text-center', 'py-2', 'px-4', 'rounded-lg', 'bg-gray-100', 'hover:bg-gray-200', 'transition');
+
+                if (new Date(year, month, day).getDay() === 0) {
+                    dayElement.classList.add('text-red-600');
+                }
+
+                const dateToCheck = new Date(year, month, day);
+                if (dateToCheck < currentDate.setHours(0, 0, 0, 0)) {
+                    dayElement.classList.add('text-gray-400');
+                    dayElement.style.pointerEvents = 'none'; // Disable past dates
+                }
+
+                dayElement.onclick = function () {
+                    openModal(year, month, day);
+                };
+
+                calendarElement.appendChild(dayElement);
+            }
+        }
+
+        // Navigate Month Function
+        function navigateMonth(direction) {
+            currentMonth += direction;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            generateCalendar(currentMonth, currentYear);
+        }
+
+        // Open Modal Function
+        function openModal(year, month, day) {
+            const formattedDate = `${year}-${month + 1}-${day}`;
+            document.getElementById('selected-date').value = formattedDate;
+            document.getElementById('reminder-modal').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+        }
+
+        // Close Modal Function
+        function closeModal() {
+            document.getElementById('reminder-modal').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        // Initial Calendar Load
+        generateCalendar(currentMonth, currentYear);
+    </script>
+</body>
+
+</html>

@@ -7,66 +7,63 @@ Account Management
 
 {% block content %}
 <!-- Page Container -->
-<div class="container mx-auto mt-20 p-6 max-w-4xl bg-white rounded-xl shadow-lg">
+<div class="container mx-auto mt-5 p-8 max-w-3xl bg-gray-100 rounded-lg shadow-md">
     <!-- Header Section -->
-    <h2 class="text-2xl font-bold text-primary text-center mb-6">Account Management</h2>
+    <h2 class="text-3xl font-bold text-center text-gray-800 mb-5">Profile</h2>
 
     <!-- Content Wrapper -->
-    <div class="flex flex-col md:flex-row items-center">
+    <div class="flex flex-col md:flex-row items-start md:items-center space-y-8 md:space-y-0">
         <!-- Profile Picture Section -->
-        <div class="flex justify-center md:w-1/3 mb-6 md:mb-0">
+        <div class="md:w-1/3 flex justify-center">
             {% if user.profile.profile_picture %}
             <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture"
-                class="w-40 h-40 rounded-lg shadow-md object-cover">
+                class="w-40 h-40 rounded-full shadow-md border-4 border-blue-500 object-cover">
             {% else %}
             <img src="{% static 'images/default_profile.png' %}" alt="Default Profile Picture"
-                class="w-40 h-40 rounded-lg shadow-md object-cover">
+                class="w-40 h-40 rounded-full shadow-md border-4 border-gray-300 object-cover">
             {% endif %}
         </div>
 
         <!-- Form Section -->
-        <div class="flex-1 md:ml-6">
-            <form method="post" enctype="multipart/form-data" class="space-y-4">
+        <div class="flex-1 md:ml-8">
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
                 {% csrf_token %}
                 <!-- Username -->
                 <div>
-                    <label for="username" class="block text-sm font-medium text-gray-700">Username:</label>
-                    <input type="text" name="username" id="username"
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary"
-                        value="{{ user.username }}">
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <input type="text" name="username" id="username" value="{{ user.username }}"
+                        class="w-full px-4 py-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <!-- First Name -->
                 <div>
-                    <label for="first_name" class="block text-sm font-medium text-gray-700">First Name:</label>
-                    <input type="text" name="first_name" id="first_name"
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary"
-                        value="{{ user.first_name }}">
+                    <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                    <input type="text" name="first_name" id="first_name" value="{{ user.first_name }}"
+                        class="w-full px-4 py-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <!-- Last Name -->
                 <div>
-                    <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name:</label>
-                    <input type="text" name="last_name" id="last_name"
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary"
-                        value="{{ user.last_name }}">
+                    <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                    <input type="text" name="last_name" id="last_name" value="{{ user.last_name }}"
+                        class="w-full px-4 py-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <!-- Password -->
                 <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700">Password:</label>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                     <input type="password" name="password" id="password"
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary">
+                        class="w-full px-4 py-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <!-- Profile Picture -->
                 <div>
-                    <label for="profile_picture" class="block text-sm font-medium text-gray-700">Profile
-                        Picture:</label>
+                    <label for="profile_picture" class="block text-sm font-medium text-gray-700 mb-1">Profile
+                        Picture</label>
                     <input type="file" name="profile_picture" id="profile_picture"
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-primary">
+                        class="w-full px-4 py-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <!-- Submit Button -->
                 <div>
                     <button type="submit"
-                        class="w-full py-2 px-4 bg-primary text-white rounded-lg font-medium hover:bg-blue-700 transition">
-                        Update
+                        class="w-full py-3 px-6 bg-blue-500 text-white rounded-md font-semibold hover:bg-blue-600 transition ease-in-out duration-200">
+                        Update Account
                     </button>
                 </div>
             </form>
@@ -76,11 +73,10 @@ Account Management
 
 <!-- Notification -->
 {% if success %}
-<div class="fixed bottom-4 left-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-fade-in-out">
-    Your account has been updated successfully.
+<div class="fixed bottom-4 left-4 bg-green-500 text-white px-6 py-3 rounded-md shadow-md animate-fade-in-out">
+    Account updated successfully!
 </div>
 {% endif %}
-
 {% endblock %}
 
 {% block extra_css %}

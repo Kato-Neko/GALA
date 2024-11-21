@@ -28,12 +28,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
     'user',
-    'calendar',
+    'eventcalendar',
     'recommendation',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -59,9 +58,9 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR / 'templates',         # Global templates folder
-            BASE_DIR / 'user/templates',    # User app-specific templates folder
-            BASE_DIR / 'calendar/templates',
+            BASE_DIR / 'templates',       
+            BASE_DIR / 'user/templates',   
+            BASE_DIR / 'eventcalendar/templates',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
