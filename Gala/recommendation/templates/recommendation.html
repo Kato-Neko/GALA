@@ -1,73 +1,54 @@
-<!-- recommendation.html -->
 {% extends 'base.html' %}
 {% load static %}
 
-{% block menu %}
-    {% include 'menu.html' %}
-{% endblock %}
-
 {% block content %}
-<body class="imnida" style="background: linear-gradient(to bottom, #add8e6, #ffffff);">
-<div class="main-content" style="background: linear-gradient(to bottom, #add8e6, #ffffff); min-height: 100vh; position: relative; padding: 20px;">
-    <!-- Top-right Logo -->
-    <a href="/" style="position: absolute; top: 20px; right: 20px;">
-        <img src="{% static 'icons/logo.png' %}" alt="Logo" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid white; box-shadow: 0px 4px 6px rgba(0,0,0,0.2);">
-    </a>
 
-    <div class="container py-4">
+<body class="min-h-screen bg-gradient-to-b from-blue-200 to-white">
+    <div class="container mx-auto py-10">
         <!-- Header Section -->
-        <h1 class="text-center mb-4" style="color: #d83f3f; font-family: 'Merriweather', serif; font-weight: bold; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);">
-            🎄 Location Recommendations 🎁
-        </h1>
-        <h2 class="text-center mb-4" style="color: #d83f3f  ; font-family: 'Merriweather', serif; font-weight: bold; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);">
-            Within a 1000-meter radius
-        </h2>
-
-        <!-- Search Bar -->
-        <div class="row justify-content-center mb-4">
-            <div class="col-md-6">
-                <form method="GET" class="search-form">
-                    <div class="input-group">
-                        <input type="text" name="search" class="form-control"
-                               placeholder="Search for locations..."
-                               value="{{ query }}" 
-                               style="border: 2px solid #ffffff; border-right: none; border-radius: 20px 0 0 20px; padding: 10px;">
-                        <div class="input-group-append">
-                            <button type="submit" class="btn" style="background-color: #ffffff; color: #d83f3f; border-radius: 0 20px 20px 0; font-weight: bold;">
-                                Search
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-red-600 drop-shadow-md">
+                🎄 Location Recommendations 🎁
+            </h1>
+            <h2 class="text-2xl font-semibold text-red-600 drop-shadow-md">
+                Within a 1000-meter radius
+            </h2>
         </div>
 
-        <!-- Locations Grid -->
-        <div class="row">
-            {% for location in locations %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm" style="border: 2px solid #ffffff; border-radius: 15px; background-color: rgba(255, 255, 255, 0.9);">
-                    <div class="card-body" style="color: #333;">
-                        <h5 class="card-title" style="color: #d83f3f; font-weight: bold; font-family: 'Merriweather', serif;">
-                            {{ location.name }}
-                        </h5>
-                        <p class="card-text" style="font-style: italic;">{{ location.description }}</p>
-                        <ul class="list-unstyled" style="font-size: 0.9rem;">
-                            <li><strong>Distance:</strong> {{ location.distance }}</li>
-                            <li><strong>Weather:</strong> {{ location.weather }}</li>
-                        </ul>
-                    </div>
+        <!-- Search Bar Section -->
+        <div class="flex justify-center mb-8">
+            <form method="GET" class="w-full max-w-md">
+                <div class="flex shadow-lg">
+                    <input type="text" name="search"
+                        class="flex-grow p-3 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="Search for locations..." value="{{ query }}">
+                    <button type="submit"
+                        class="px-6 py-3 bg-primary text-white font-bold rounded-r-lg hover:bg-yellow-500 focus:ring-2 focus:ring-primary">
+                        Search
+                    </button>
                 </div>
+            </form>
+        </div>
+
+        <!-- Locations Grid Section -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for location in locations %}
+            <div class="bg-white rounded-lg shadow-md p-6 text-gray-700">
+                <h5 class="text-xl font-bold text-red-600">{{ location.name }}</h5>
+                <p class="italic">{{ location.description }}</p>
+                <ul class="text-sm mt-4">
+                    <li><strong>Distance:</strong> {{ location.distance }}</li>
+                    <li><strong>Weather:</strong> {{ location.weather }}</li>
+                </ul>
             </div>
             {% empty %}
-            <div class="col-12 text-center">
-                <p style="color: #ffffff; font-weight: bold; font-size: 1.2rem; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);">
+            <div class="col-span-full text-center">
+                <p class="text-lg font-semibold text-white bg-red-500 py-3 px-6 rounded-lg inline-block">
                     🎅 No locations found matching your search. Try again! 🤶
                 </p>
             </div>
             {% endfor %}
         </div>
     </div>
-</div>
-</body> 
+</body>
 {% endblock %}

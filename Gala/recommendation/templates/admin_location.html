@@ -1,9 +1,9 @@
-{% extends 'base.html' %}
+{% extends 'base-recommendation.html' %}
 <!-- admin_location.html -->
 {% block content %}
 <div class="container mt-4">
     <h2>Manage Locations</h2>
-    
+
     <!-- Add Location Form -->
     <div class="card mb-4">
         <div class="card-body">
@@ -102,13 +102,13 @@
 {% block extra_js %}
 <script>
     // Add Location
-    $('#locationForm').on('submit', function(e) {
+    $('#locationForm').on('submit', function (e) {
         e.preventDefault();
         $.ajax({
             url: '{% url "add_location" %}',
             method: 'POST',
             data: $(this).serialize(),
-            success: function(response) {
+            success: function (response) {
                 if (response.status === 'success') {
                     const location = response.location;
                     const newRow = `
@@ -131,7 +131,7 @@
     });
 
     // Edit Location
-    $(document).on('click', '.edit-btn', function() {
+    $(document).on('click', '.edit-btn', function () {
         const row = $(this).closest('tr');
         const id = row.data('id');
         const name = row.find('td:eq(0)').text();
@@ -148,16 +148,16 @@
         $('#editModal').modal('show');
     });
 
-    $('#saveEdit').on('click', function() {
+    $('#saveEdit').on('click', function () {
         const id = $('#editForm [name="location_id"]').val();
         $.ajax({
-            url: `/edit-location/${id}/`,
+            url: `/edit-location/${id}/`, // Fixed URL
             method: 'POST',
             data: $('#editForm').serialize() + '&csrfmiddlewaretoken=' + $('[name=csrfmiddlewaretoken]').val(),
-            success: function(response) {
+            success: function (response) {
                 if (response.status === 'success') {
                     const location = response.location;
-                    const row = $(`tr[data-id="${location.id}"]`);
+                    const row = $(`tr[data-id="${location.id}"]`); // Fixed selector
                     row.find('td:eq(0)').text(location.name);
                     row.find('td:eq(1)').text(location.description);
                     row.find('td:eq(2)').text(location.distance);
@@ -169,17 +169,17 @@
     });
 
     // Delete Location
-    $(document).on('click', '.delete-btn', function() {
+    $(document).on('click', '.delete-btn', function () {
         if (confirm('Are you sure you want to delete this location?')) {
             const row = $(this).closest('tr');
             const id = row.data('id');
             $.ajax({
-                url: `/delete-location/${id}/`,
+                url: `/delete-location/${id}/`, // Fixed URL
                 method: 'POST',
                 data: {
                     csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.status === 'success') {
                         row.remove();
                     }

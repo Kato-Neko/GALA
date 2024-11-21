@@ -33,14 +33,14 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'user',
-    'Calendar',
+    'calendar',
+    'recommendation',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'recommendation',
 ]
 
 MIDDLEWARE = [
@@ -61,6 +61,7 @@ TEMPLATES = [
         'DIRS': [
             BASE_DIR / 'templates',         # Global templates folder
             BASE_DIR / 'user/templates',    # User app-specific templates folder
+            BASE_DIR / 'calendar/templates',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
