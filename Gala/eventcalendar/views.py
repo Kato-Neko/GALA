@@ -6,6 +6,21 @@ class ReminderListView(ListView):
     model = EventReminder
     template_name = 'reminder_list.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add events to the context
+        reminders = EventReminder.objects.all()
+        events = [
+            {
+                "title": reminder.description,
+                "start": f"{reminder.date}T{reminder.start_time}",
+                "end": f"{reminder.date}T{reminder.end_time}",
+            }
+            for reminder in reminders
+        ]
+        context['events'] = events
+        return context
+
 class ReminderCreateView(CreateView):
     model = EventReminder
     template_name = 'reminder_create.html'
