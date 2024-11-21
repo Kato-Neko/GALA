@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from recommendation import views
+from Calendar.views import ReminderListView, ReminderCreateView, ReminderUpdateView, ReminderDeleteView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
