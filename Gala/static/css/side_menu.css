@@ -7,6 +7,12 @@
   height: 100px;
   border-bottom-left-radius: 50px;
   border-bottom-right-radius: 50px;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10000;
 }
 
 .navbar a {
@@ -15,7 +21,6 @@
   text-decoration: none;
 }
 
-/* User info container with profile picture and username */
 .navbar .avatar img {
   width: 32px;
   height: 32px;

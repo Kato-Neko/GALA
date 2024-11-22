@@ -1,6 +1,32 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    body {
+        padding-top: 120px;
+        padding-bottom: 80px;
+    }
+
+    #calendar {
+        table-layout: fixed;
+    }
+
+    .fc-day,
+    .fc-head th {
+        width: 100%;
+        min-width: 520px;
+    }
+
+    .fc-head th {
+        padding: 10px 15px;
+        text-align: center;
+    }
+
+    .fc-day {
+        padding: 10px;
+    }
+</style>
+
 <div id="calendar" class="my-8 mx-auto max-w-4xl"></div>
 
 <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" id="reminder-modal">
@@ -21,56 +47,58 @@
 
             <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-700">Save</button>
         </form>
-        <button class="w-full mt-4 bg-red-500 text-white py-2 rounded-md hover:bg-red-700" onclick="closeModal()">Close</button>
+        <button class="w-full mt-4 bg-red-500 text-white py-2 rounded-md hover:bg-red-700"
+            onclick="closeModal()">Close</button>
     </div>
 </div>
 
-<div class="mt-8 max-w-md mx-auto">
+<div class="mt-8 max-w-md mx-auto mb-10">
     <ul class="space-y-4">
         {% for reminder in object_list %}
-            <li class="p-4 bg-gray-100 rounded-lg shadow-md flex justify-between items-center">
-                <div>
-                    <h3 class="text-lg font-bold">{{ reminder.description }}</h3>
-                    <p class="text-sm text-gray-600">Date: {{ reminder.date }}</p>
-                    <p class="text-sm text-gray-600">Time: {{ reminder.start_time }} - {{ reminder.end_time }}</p>
-                </div>
-                <div class="flex space-x-2">
-                    <a href="{% url 'reminder-update' reminder.pk %}" class="px-3 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-700">Edit</a>
-                    <a href="{% url 'reminder-delete' reminder.pk %}" class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-700">Delete</a>
-                </div>
-            </li>
+        <li class="p-4 bg-gray-100 rounded-lg shadow-md flex justify-between items-center">
+            <div>
+                <h3 class="text-lg font-bold">{{ reminder.description }}</h3>
+                <p class="text-sm text-gray-600">Date: {{ reminder.date }}</p>
+                <p class="text-sm text-gray-600">Time: {{ reminder.start_time }} - {{ reminder.end_time }}</p>
+            </div>
+            <div class="flex space-x-2">
+                <a href="{% url 'reminder-update' reminder.pk %}"
+                    class="px-3 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-700">Edit</a>
+                <a href="{% url 'reminder-delete' reminder.pk %}"
+                    class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-700">Delete</a>
+            </div>
+        </li>
         {% endfor %}
     </ul>
 </div>
 
 <script>
     $(document).ready(function () {
-    $('#calendar').fullCalendar({
-        header: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'month,agendaWeek,agendaDay'
-        },
-        events: {{ events|safe }},  
+        $('#calendar').fullCalendar({
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            events: {{ events| safe }},
         dayClick: function (date, jsEvent, view) {
-            const today = moment().startOf('day'); 
+            const today = moment().startOf('day');
             if (date.isBefore(today)) {
                 alert("You cannot create a reminder for a past date.");
-                return; 
+                return;
             }
             openModal(date.format());
         }
         });
     });
 
-    
     function openModal(date) {
         document.getElementById('selected-date').value = date;
         document.getElementById('reminder-modal').classList.remove('hidden');
     }
 
     function closeModal() {
-        console.log('Closing modal...'); 
+        console.log('Closing modal...');
         document.getElementById('reminder-modal').classList.add('hidden');
     }
 </script>
