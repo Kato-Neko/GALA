@@ -1,7 +1,7 @@
 <!-- In reminder_list.html -->
 {% extends 'base.html' %}
 
-{{% block content %}
+{% block content %}
 <div id="calendar" class="my-8 mx-auto max-w-4xl"></div>
 
 <!-- Reminder Modal -->
@@ -23,34 +23,60 @@
 
             <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-700">Save</button>
         </form>
-        <button class="w-full mt-4 bg-red-500 text-white py-2 rounded-md hover:bg-red-700"
-            onclick="closeModal()">Close</button>
+        <button class="w-full mt-4 bg-red-500 text-white py-2 rounded-md hover:bg-red-700" onclick="closeModal()">Close</button>
     </div>
+</div>
+
+<!-- Reminder List -->
+<div class="mt-8">
+    <ul class="space-y-4">
+        {% for reminder in object_list %}
+            <li class="p-4 bg-gray-100 rounded-lg shadow-md flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg font-bold">{{ reminder.description }}</h3>
+                    <p class="text-sm text-gray-600">Date: {{ reminder.date }}</p>
+                    <p class="text-sm text-gray-600">Time: {{ reminder.start_time }} - {{ reminder.end_time }}</p>
+                </div>
+                <div class="flex space-x-2">
+                    <a href="{% url 'reminder-update' reminder.pk %}" class="px-3 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-700">Edit</a>
+                    <a href="{% url 'reminder-delete' reminder.pk %}" class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-700">Delete</a>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
 </div>
 
 <script>
     $(document).ready(function () {
-        $('#calendar').fullCalendar({
-            header: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'month,agendaWeek,agendaDay'
-            },
-            events: {{ events| safe }},  <!-- Pass events from the context -->
+    $('#calendar').fullCalendar({
+        header: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'month,agendaWeek,agendaDay'
+        },
+        events: {{ events|safe }},  // Pass events from the context
         dayClick: function (date, jsEvent, view) {
+            // Prevent clicks on past dates
+            const today = moment().startOf('day'); // Get today's date at midnight
+            if (date.isBefore(today)) {
+                alert("You cannot create a reminder for a past date.");
+                return; // Exit the function
+            }
             openModal(date.format());
         }
         });
     });
 
+    // Opens the modal and sets the selected date
     function openModal(date) {
-        $('#selected-date').val(date);
-        $('#reminder-modal').removeClass('hidden');
+        document.getElementById('selected-date').value = date;
+        document.getElementById('reminder-modal').classList.remove('hidden');
     }
 
+    // Closes the modal
     function closeModal() {
-        $('#reminder-modal').addClass('hidden');
+        console.log('Closing modal...'); // Debugging log
+        document.getElementById('reminder-modal').classList.add('hidden');
     }
 </script>
-
 {% endblock %}
