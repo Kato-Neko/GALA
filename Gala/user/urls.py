@@ -16,6 +16,7 @@ urlpatterns = [
 
     # Account management (with login required decorator)
     path('account_management/', views.account_management, name='account_management'),
+    path('delete-account/', views.delete_account, name='delete_account'),
 
     # You can also use Django's built-in password change views if needed
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),

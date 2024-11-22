@@ -112,7 +112,7 @@
 
         <!-- Settings Dropdown -->
         <div class="group relative">
-            <button onclick="handleSettingsClick()">
+            <button onclick="handleSettingsClick()" class="focus:outline-none">
                 <svg class="w-10 h-10 text-gray-800 dark:text-white" aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                     <path fill-rule="evenodd"
@@ -128,6 +128,7 @@
             </ul>
             {% endif %}
         </div>
+
     </div>
 
     <!-- Include the login.html modal -->
@@ -136,21 +137,35 @@
     <!-- JavaScript to handle modal -->
     <script>
         function handleSettingsClick() {
-            // Get user authentication status from the data attribute
+            // Check if the user is authenticated via the data attribute
             const isAuthenticated = document.body.dataset.userAuthenticated === "true";
 
             if (!isAuthenticated) {
-                // Show login modal if not authenticated
-                const loginModal = document.getElementById('loginModal');
-                loginModal.classList.remove('hidden');
-                loginModal.classList.add('flex');
+                // If not authenticated, open the auth modal
+                openAuthModal();
             }
         }
 
-        function closeModal() {
-            const loginModal = document.getElementById('loginModal');
-            loginModal.classList.add('hidden');
-            loginModal.classList.remove('flex');
+        function openAuthModal() {
+            const authModal = document.getElementById("authModal");
+            authModal.classList.remove("hidden");
+            authModal.classList.add("flex");
+        }
+
+        function closeAuthModal() {
+            const authModal = document.getElementById("authModal");
+            authModal.classList.add("hidden");
+            authModal.classList.remove("flex");
+        }
+
+        function switchToSignup() {
+            document.getElementById("loginForm").classList.add("hidden");
+            document.getElementById("signupForm").classList.remove("hidden");
+        }
+
+        function switchToLogin() {
+            document.getElementById("signupForm").classList.add("hidden");
+            document.getElementById("loginForm").classList.remove("hidden");
         }
     </script>
 </body>

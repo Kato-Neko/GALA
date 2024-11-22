@@ -1,40 +1,77 @@
-<!DOCTYPE html>
-<html lang="en">
+{% load static %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
+<!-- Signup Modal -->
+<div id="signupModal"
+    class="hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 backdrop-blur-md z-[9999]">
+    <div
+        class="bg-gray-800 p-6 rounded-lg max-w-sm w-full shadow-lg transform transition-all duration-300 ease-out relative">
+        <!-- Close Button -->
+        <button onclick="closeSignupModal()"
+            class="absolute top-3 right-3 text-gray-300 hover:text-white text-2xl">&times;</button>
 
-<body>
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <h2 class="text-center">Signup</h2>
-
-                <!-- Display success or error messages -->
-                {% if messages %}
-                {% for message in messages %}
-                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">
-                    {{ message }}
-                </div>
-                {% endfor %}
-                {% endif %}
-
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
-                </form>
-
-                <p class="text-center mt-3">
-                    Already have an account? <a href="{% url 'login' %}">Log in</a>
-                </p>
-            </div>
+        <!-- Logo and Title -->
+        <div class="text-center mb-6">
+            <img src="{% static 'icons/logo.png' %}" alt="Logo" class="mx-auto mb-4 w-20 h-20" />
+            <h2 class="text-2xl font-semibold text-gray-100">Create an Account</h2>
+            <p class="text-gray-400 text-sm">Join us and start your journey</p>
         </div>
-    </div>
-</body>
 
-</html>
+        {% if messages %}
+        <div class="space-y-2">
+            {% for message in messages %}
+            <div
+                class="text-sm text-center {% if message.tags == 'success' %}text-green-400{% else %}text-red-400{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'signup' %}" class="space-y-4">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit"
+                class="w-full bg-primary text-white py-2 rounded-lg font-semibold hover:bg-primary-dark transition">
+                Sign Up
+            </button>
+        </form>
+
+        <p class="text-center text-gray-400 text-sm mt-4">
+            Already have an account?
+            <a href="#" onclick="switchToLogin()" class="text-primary font-semibold hover:underline">Log in</a>
+        </p>
+    </div>
+</div>
+
+<script>
+    function openModal() {
+        document.getElementById("loginModal").classList.remove("hidden");
+        document.getElementById("loginModal").classList.add("flex");
+    }
+
+    function closeModal() {
+        document.getElementById("loginModal").classList.add("hidden");
+        document.getElementById("loginModal").classList.remove("flex");
+    }
+
+    function openSignupModal() {
+        document.getElementById("signupModal").classList.remove("hidden");
+        document.getElementById("signupModal").classList.add("flex");
+    }
+
+    function closeSignupModal() {
+        document.getElementById("signupModal").classList.add("hidden");
+        document.getElementById("signupModal").classList.remove("flex");
+    }
+
+    function switchToSignup() {
+        closeModal();
+        openSignupModal();
+    }
+
+    function switchToLogin() {
+        closeSignupModal();
+        openModal();
+    }
+
+</script>

@@ -1,11 +1,28 @@
-#user/views.py
-
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, update_session_auth_hash, login, logout
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from django import forms
 from django.contrib import messages
 from user.models import Profile
+
+class CustomUserCreationForm(UserCreationForm):
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={
+        'placeholder': 'Enter your email',
+        'class': 'w-full bg-gray-700 text-gray-200 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50',
+    }))
+
+    class Meta:
+        model = User 
+        fields = ['username', 'email', 'password1', 'password2']
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data['email']
+        if commit:
+            user.save()
+        return user
 
 def custom_login_view(request):
     if request.method == 'POST':
@@ -23,33 +40,32 @@ def custom_login_view(request):
 
     return render(request, 'login.html')
 
+def signup_view(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save() 
+            messages.success(request, 'Account created successfully! You can now log in.')
+
+            return redirect(f"/?prefill_username={form.cleaned_data['username']}")
+        else:
+            messages.error(request, 'Please fix the errors below and try again.')
+    else:
+        form = CustomUserCreationForm()
+
+    return render(request, 'login.html', {'form': form, 'signup_mode': True})
+
+
 @login_required
 def custom_logout(request):
     logout(request)
     return redirect('home')
 
-def signup_view(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Account created successfully! You can now log in.')
-            return redirect('login')
-        else:
-            messages.error(request, 'Please fix the errors below and try again.')
-    else:
-        form = UserCreationForm()
-
-    return render(request, 'signup.html', {'form': form})
-
 @login_required
 def account_management(request):
     user = request.user
 
-    # Ensure the profile exists
     profile, created = Profile.objects.get_or_create(user=user)
-
-    success = False
 
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -58,7 +74,6 @@ def account_management(request):
         password = request.POST.get('password')
         profile_picture = request.FILES.get('profile_picture')
 
-        # Update user fields
         if username and username != user.username:
             user.username = username
         if first_name and first_name != user.first_name:
@@ -67,20 +82,26 @@ def account_management(request):
             user.last_name = last_name
         if password:
             user.set_password(password)
-            update_session_auth_hash(request, user)  # Keep user logged in
+            login(request, user)
 
         user.save()
 
-        # Update profile picture if a new one is uploaded
         if profile_picture:
             profile.profile_picture = profile_picture
             profile.save()
 
-        success = True
         messages.success(request, "Account updated successfully!")
-        return redirect('account_management')  # Stay on the same page
+        return redirect('account_management') 
 
-    return render(request, 'account_management.html', {'user': user, 'profile': profile, 'success': success})
+    return render(request, 'account_management.html', {'user': user, 'profile': profile})
+
+@login_required
+def delete_account(request):
+    user = request.user
+    Profile.objects.filter(user=user).delete()
+    user.delete()
+    messages.success(request, "Your account has been deleted successfully.")
+    return redirect('home')
 
 def home(request):
     return render(request, 'home.html')
