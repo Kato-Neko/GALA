@@ -1,10 +1,8 @@
-<!-- In reminder_list.html -->
 {% extends 'base.html' %}
 
 {% block content %}
 <div id="calendar" class="my-8 mx-auto max-w-4xl"></div>
 
-<!-- Reminder Modal -->
 <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" id="reminder-modal">
     <div class="bg-white p-8 rounded-lg shadow-lg max-w-sm w-full">
         <h2 class="text-xl font-bold mb-4">Create Reminder</h2>
@@ -27,7 +25,6 @@
     </div>
 </div>
 
-<!-- Reminder List -->
 <div class="mt-8">
     <ul class="space-y-4">
         {% for reminder in object_list %}
@@ -54,28 +51,26 @@
             center: 'title',
             right: 'month,agendaWeek,agendaDay'
         },
-        events: {{ events|safe }},  // Pass events from the context
+        events: {{ events|safe }},  
         dayClick: function (date, jsEvent, view) {
-            // Prevent clicks on past dates
-            const today = moment().startOf('day'); // Get today's date at midnight
+            const today = moment().startOf('day'); 
             if (date.isBefore(today)) {
                 alert("You cannot create a reminder for a past date.");
-                return; // Exit the function
+                return; 
             }
             openModal(date.format());
         }
         });
     });
 
-    // Opens the modal and sets the selected date
+    
     function openModal(date) {
         document.getElementById('selected-date').value = date;
         document.getElementById('reminder-modal').classList.remove('hidden');
     }
 
-    // Closes the modal
     function closeModal() {
-        console.log('Closing modal...'); // Debugging log
+        console.log('Closing modal...'); 
         document.getElementById('reminder-modal').classList.add('hidden');
     }
 </script>
