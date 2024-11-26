@@ -1,0 +1,44 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GALA Unified Layout</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FFC107',
+                        dark: '#00386d', /* Unified color */
+                    },
+                },
+            },
+        };
+    </script>
+
+    <link rel="stylesheet" href="{% static 'css/suggestions.css' %}">
+    <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lobster+Two:ital,wght@0,400;0,700;1,400;1,700&family=Outfit:wght@100..900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="bg-gray-100" data-user-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
+    <div class="center-rectangle bg-dark shadow-lg p-10 rounded-lg">
+        <h2 class="outfit text-3xl font-regular whitespace-nowrap">
+            Events near you to <span class="lobster-two-bold text-4xl font-bold px-2"> GALA </span> at
+        </h2>
+    </div>
+</body>
+
+</html>

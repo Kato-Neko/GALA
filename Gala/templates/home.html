@@ -5,10 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Map Background</title>
-    {% include 'menu.html' %}
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
         /* Ensure the map covers the entire screen */
         html,
@@ -28,6 +31,11 @@
 <body>
     <!-- Map Container -->
     <div id="map"></div>
+
+    <!-- Include Suggestions Modal -->
+    {% include 'suggestions.html' %}
+    {% include 'menu.html' %}
+
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

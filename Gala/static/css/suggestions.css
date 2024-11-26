@@ -1,0 +1,28 @@
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.center-rectangle {
+  justify-content: center;
+  left: 20px;
+  top: auto;
+  bottom: auto;
+  max-width: 500px;
+  width: 60%;
+  max-height: 1200px;
+  height: 60%;
+  z-index: 1000;
+  border-radius: 25px;
+  position: absolute;
+  color: #fff;
+  background-color: rgba(0, 56, 100, 0.7); /* White with 80% opacity */
+  border: 2px solid rgb(0, 56, 109);
+}

@@ -3,7 +3,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 10px 50px;
   height: 100px;
   border-bottom-left-radius: 50px;
   border-bottom-right-radius: 50px;
@@ -77,8 +77,8 @@
 }
 
 .navbar-end .avatar img {
-  width: 32px;
-  height: 32px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   object-fit: cover;
 }
