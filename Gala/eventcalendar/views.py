@@ -13,9 +13,10 @@ class ReminderListView(ListView):
         reminders = EventReminder.objects.all()
         events = [
             {
+                "id": reminder.event_reminder_id,
                 "title": reminder.description,
                 "start": f"{reminder.date}T{reminder.start_time}",
-                "end": f"{reminder.date}T{reminder.end_time}",
+                "end": f"{reminder.date}T{reminder.end_time}" if reminder.end_time else None,
             }
             for reminder in reminders
         ]
