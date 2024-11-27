@@ -126,6 +126,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',  # Global static folder
+    BASE_DIR / 'static' / 'images',  # Global static folder
     BASE_DIR / 'user' / 'static',  # App-specific static folder
 ]
 
