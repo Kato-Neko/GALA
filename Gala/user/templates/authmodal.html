@@ -1,9 +1,14 @@
 {% load static %}
 
+<head>
+    <link rel="stylesheet" href="{% static 'css/authmodal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
+</head>
+
 <!-- Combined Auth Modal -->
 <div id="authModal"
     class="hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 backdrop-blur-md z-[9999]">
-    <div
+    <div id="authModal-container"
         class="bg-gray-800 p-6 rounded-lg max-w-sm w-full shadow-lg transform transition-all duration-300 ease-out relative">
         <!-- Close Button -->
         <button onclick="closeAuthModal()" class="absolute top-3 right-3 text-gray-300 hover:text-white text-2xl">
@@ -11,26 +16,27 @@
         </button>
 
         <!-- Logo -->
-        <div class="text-center mb-6">
-            <img src="{% static 'icons/logo.png' %}" alt="Logo" class="mx-auto mb-4 w-20 h-20" />
+        <div class="logo text-center ">
+            <img src="{% static 'icons/logo.png' %}" alt="Logo" />
         </div>
 
         <!-- Login Form -->
         <div id="loginForm" class="space-y-4">
             <h2 class="text-2xl font-semibold text-gray-100 text-center">Welcome Back</h2>
             <p class="text-gray-400 text-sm text-center">Login to continue</p>
-            <form method="post" action="{% url 'login' %}" class="space-y-4">
+
+            <form method="post" action="{% url 'login' %}" class="space-y-4 w-full">
                 {% csrf_token %}
                 <div>
                     <label for="username" class="block text-sm text-gray-300 mb-1">Username</label>
                     <input id="username" name="username" type="text" placeholder="Enter your username"
-                        class="w-full bg-gray-700 text-gray-200 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"
+                        class="username bg-gray-700 text-gray-200 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"
                         required />
                 </div>
                 <div>
                     <label for="password" class="block text-sm text-gray-300 mb-1">Password</label>
                     <input id="password" name="password" type="password" placeholder="Enter your password"
-                        class="w-full bg-gray-700 text-gray-200 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"
+                        class="password bg-gray-700 text-gray-200 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"
                         required />
                 </div>
                 <button type="submit"
@@ -38,10 +44,12 @@
                     Login
                 </button>
             </form>
+
+
             <p class="text-center text-gray-400 text-sm mt-4">
                 Don't have an account yet?
                 <a href="#" onclick="switchToSignup(); return false;"
-                    class="text-primary font-semibold hover:underline">SIGNUP here</a>
+                    class="link-text text-primary font-semibold hover:underline">SIGNUP here</a>
             </p>
         </div>
 
@@ -94,7 +102,7 @@
             <p class="text-center text-gray-400 text-sm mt-4">
                 Already have an account?
                 <a href="#" onclick="switchToLogin(); return false;"
-                    class="text-primary font-semibold hover:underline">Log in</a>
+                    class="link-text text-primary font-semibold hover:underline">LOG-IN here</a>
             </p>
         </div>
     </div>
@@ -153,19 +161,3 @@
         }
     });
 </script>
-
-
-<style>
-    .bg-primary {
-        background-color: #4F46E5;
-    }
-
-    .bg-primary-dark {
-        background-color: #3730A3;
-    }
-
-    /* Blurry backdrop when modal is active */
-    .backdrop-blur-md {
-        backdrop-filter: blur(8px);
-    }
-</style>

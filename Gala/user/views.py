@@ -40,7 +40,7 @@ def custom_login_view(request):
         else:
             messages.error(request, 'Invalid username or password. Please try again.')
 
-    return render(request, 'login.html')
+    return render(request, 'authmodal.html')
 
 def signup_view(request):
     if request.method == 'POST':
@@ -55,7 +55,7 @@ def signup_view(request):
     else:
         form = CustomUserCreationForm()
 
-    return render(request, 'login.html', {'form': form, 'signup_mode': True})
+    return render(request, 'authmodal.html', {'form': form, 'signup_mode': True})
 
 
 @login_required
