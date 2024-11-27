@@ -2,93 +2,188 @@
 {% load static %}
 
 {% block title %}
-Account Management
+GALA - Account Management
 {% endblock %}
 
-{% block content %}
-<div class="min-h-screen flex items-center justify-center pt-20">
-    <div class="container mx-auto p-8 max-w-3xl bg-dark text-white rounded-lg shadow-md">
-        <h2 class="text-4xl font-bold text-center text-white mb-5">Manage Your Profile</h2>
-        <p class="text-sm text-center text-gray-200 mb-5">Update your details or delete your account.</p>
+<head>
+    <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
+</head>
 
-        <form method="post" enctype="multipart/form-data" class="space-y-6">
+{% block content %}
+<style>
+    .transform {
+        transform: translateY(-50%);
+    }
+
+    #account-main {
+        background: rgb(1, 92, 165);
+    }
+
+    #account-container {
+        position: fixed;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        overflow: visible;
+
+        color: rgb(255, 255, 255);
+        border-color: rgba(3, 2, 84, 1);
+        box-shadow: 0 0 10px rgba(0, 22, 112, 0.3);
+        backdrop-filter: blur(12px);
+
+        max-width: 720px;
+        max-height: 680px;
+        width: 100%;
+        height: 100%;
+    }
+
+    .profile-picture {
+        width: 280px;
+        height: 280px;
+        overflow: hidden;
+        left: -140px;
+        top: 350px;
+        position: absolute;
+    }
+
+    .userName,
+    .firstName,
+    .lastName,
+    .account-email,
+    .account-password {
+        color: #fff;
+    }
+
+    .form-input {
+        width: 100%;
+        max-width: 1020px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        font-size: 16px;
+        box-sizing: border-box;
+        background-color: #f9faff;
+    }
+
+    .form-label {
+        font-weight: bold;
+        margin-bottom: 6px;
+        display: block;
+        font-size: 14px;
+        color: #ffffff;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .password-group {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+    }
+
+    button.update-button {
+        background-color: #46eb25;
+        color: #ffffff;
+    }
+
+    button.delete-button {
+        background-color: #dc2626;
+        color: #ffffff;
+        margin-top: 16px;
+    }
+</style>
+
+<div id="account-main" class="min-h-screen flex items-center justify-center pt-20 relative">
+    <div id="account-container" class="mx-auto p-8 max-w-3xl rounded-lg shadow-md relative">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
-            <div class="flex items-center space-x-6">
-                <div
-                    class="w-32 h-32 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center relative">
-                    <!-- Profile Picture Section -->
-                    {% if user.is_authenticated %}
-                    {% if user.profile.profile_picture %}
-                    <img id="profile-picture-preview" src="{{ user.profile.profile_picture.url }}" alt="Profile Picture"
-                        class="object-cover w-full h-full cursor-pointer">
-                    {% else %}
-                    <span class="text-4xl font-medium text-gray-500">?</span>
-                    {% endif %}
-                    {% else %}
-                    <span class="text-4xl font-medium text-gray-500">?</span>
-                    {% endif %}
+            <!-- Profile Picture Section -->
+            <div class="profile-picture rounded-full transform -translate-y-1/2">
+                {% if user.is_authenticated and user.profile.profile_picture %}
+                <img id="profile-picture-preview" src="{{ user.profile.profile_picture.url }}" alt="Profile Picture"
+                    class="object-cover w-full h-full">
+                {% else %}
+                <span class="text-4xl font-medium text-gray-400 flex items-center justify-center h-full">?</span>
+                {% endif %}
+                <input type="file" name="profile_picture" id="profile-picture-input"
+                    class="absolute inset-0 opacity-0 cursor-pointer" onchange="previewProfilePicture(event)">
+            </div>
 
-                    <!-- Hidden File Input to Change Profile Picture -->
-                    <input type="file" name="profile_picture" id="profile-picture-input"
-                        class="absolute inset-0 opacity-0 cursor-pointer" onchange="previewProfilePicture(event)">
-                </div>
+            <!-- Content Section -->
+            <div class="pl-40">
+                <h2 class="text-4xl font-bold text-center text-white-700 mb-5">Manage Your Profile</h2>
+                <p class="text-sm text-center text-white-300 mb-5">Update your details or delete your account.</p>
 
-                <div class="flex-1">
-                    <!-- Username Field -->
-                    <div>
-                        <label for="username" class="block text-sm font-semibold text-white mb-1">Username</label>
-                        <input type="text" name="username" id="username" value="{{ user.username }}"
-                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring focus:ring-blue-400 focus:outline-none text-gray-900">
-                    </div>
-
-                    <!-- First Name and Last Name Fields -->
-                    <div class="flex space-x-4">
-                        <div class="flex-1">
-                            <label for="first_name" class="block text-sm font-semibold text-white mb-1">First
-                                Name</label>
-                            <input type="text" name="first_name" id="first_name" value="{{ user.first_name }}"
-                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring focus:ring-blue-400 focus:outline-none text-gray-900">
+                <form method="post" enctype="multipart/form-data" class="space-y-6">
+                    {% csrf_token %}
+                    <div class="space-y-4">
+                        <!-- Username -->
+                        <div>
+                            <label for="username"
+                                class="userName block text-sm font-semibold text-gray-700 mb-1">Username</label>
+                            <input type="text" name="username" id="username" value="{{ user.username }}"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring focus:ring-blue-300 focus:outline-none">
                         </div>
-                        <div class="flex-1">
-                            <label for="last_name" class="block text-sm font-semibold text-white mb-1">Last Name</label>
-                            <input type="text" name="last_name" id="last_name" value="{{ user.last_name }}"
-                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring focus:ring-blue-400 focus:outline-none text-gray-900">
+
+                        <!-- First Name and Last Name -->
+                        <div class="flex space-x-4">
+                            <div class="flex-1">
+                                <label for="first_name"
+                                    class="firstName block text-sm font-semibold text-gray-700 mb-1">First
+                                    Name</label>
+                                <input type="text" name="first_name" id="first_name" value="{{ user.first_name }}"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring focus:ring-blue-300 focus:outline-none">
+                            </div>
+                            <div class="flex-1">
+                                <label for="last_name"
+                                    class="lastName block text-sm font-semibold text-gray-700 mb-1">Last
+                                    Name</label>
+                                <input type="text" name="last_name" id="last_name" value="{{ user.last_name }}"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring focus:ring-blue-300 focus:outline-none">
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Email Field -->
-                    <div>
-                        <label for="email" class="block text-sm font-semibold text-white mb-1">Email</label>
-                        <input type="email" name="email" id="email" value="{{ user.email }}"
-                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring focus:ring-blue-400 focus:outline-none text-gray-900">
-                    </div>
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" name="email" id="email" value="{{ user.email }}" class="form-input">
+                        </div>
 
-                    <!-- Password Field -->
-                    <div>
-                        <label for="password" class="block text-sm font-semibold text-white mb-1">Password</label>
-                        <input type="password" name="password" id="password"
-                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring focus:ring-blue-400 focus:outline-none text-gray-900">
-                    </div>
+                        <!-- Password -->
+                        <div class="form-group">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" name="password" id="password" class="form-input">
+                        </div>
 
-                    <!-- Submit Button -->
-                    <button type="submit"
-                        class="w-full py-3 px-6 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition mt-6">
-                        Update Account
+                        <hr class="mt-15 mb-15 border-gray-300">
+
+                        <!-- Update Button -->
+                        <button type="submit"
+                            class="w-full py-3 px-6 bg-green-500 text-white rounded-lg font-bold hover:bg-white-600 transition shadow-md">
+                            Update Account
+                        </button>
+                </form>
+
+                <!-- Delete Account Section -->
+                <div class="text-center">
+                    <button onclick="openDeleteModal()"
+                        class="w-full py-3 px-6 bg-red-500 text-white rounded-lg font-bold hover:bg-white-600 transition shadow-md">
+                        Delete Account
                     </button>
                 </div>
             </div>
-        </form>
-
-        <hr class="my-6 border-gray-400">
-
-        <!-- Delete Account Section -->
-        <div class="text-center">
-            <button onclick="openDeleteModal()"
-                class="w-full py-3 px-6 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg font-bold hover:from-red-600 hover:to-red-700 transition">
-                Delete Account
-            </button>
-        </div>
     </div>
 </div>
 
@@ -112,15 +207,7 @@ Account Management
 </div>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-    .bg-dark {
-        background-color: #00386d;
-    }
-</style>
-{% endblock %}
 
-{% block extra_js %}
 <script>
     function openDeleteModal() {
         document.getElementById("deleteModal").classList.remove("hidden");
@@ -132,14 +219,12 @@ Account Management
         document.getElementById("deleteModal").classList.remove("flex");
     }
 
-    // Function to preview the selected profile picture before submission
     function previewProfilePicture(event) {
-        const file = event.target.files[0]; // Get the selected file
+        const file = event.target.files[0];
         if (file) {
-            const preview = document.getElementById('profile-picture-preview'); // Target the image element
-            preview.src = URL.createObjectURL(file); // Set the image source to the uploaded file
-            preview.onload = () => URL.revokeObjectURL(preview.src); // Clean up after loading
+            const preview = document.getElementById('profile-picture-preview');
+            preview.src = URL.createObjectURL(file);
+            preview.onload = () => URL.revokeObjectURL(preview.src);
         }
     }
 </script>
-{% endblock %}
