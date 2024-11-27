@@ -1,3 +1,5 @@
+<!--menu.html-->
+
 {% load static %}
 
 <!DOCTYPE html>
@@ -15,16 +17,15 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#FFC107',
-                        dark: '#00386d', /* Unified color */
+                        primary: rgb(0, 56, 109),
+                        secondary: rgb(0, 56, 109),
                     },
                 },
             },
         };
     </script>
 
-    <!-- Include your custom CSS from the static folder -->
-    <link rel="stylesheet" href="{% static 'css/side_menu.css' %}">
+    <link rel="stylesheet" href="{% static 'css/menu.css' %}">
     <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,16 +36,16 @@
 
 </head>
 
-<body class="bg-gray-100" data-user-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
+<body class="menu-page" data-user-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
 
     <!-- Top Navbar -->
-    <div class="navbar bg-dark shadow-md">
+    <div class="navbar">
         <div class="flex items-center space-x-4 w-full pl-40 pr-40 justify-between">
 
             <!-- GALA Title -->
             <div class="lobster-two-bold text-5xl text-white ">GALA</div>
 
-            <div class="form-control flex-grow max-w-[720px] mx-auto">
+            <div class="form-control flex-grow max-w-[920px] mx-auto">
                 <input type="text" placeholder="Search" class="input input-bordered w-full" />
             </div>
 
@@ -61,13 +62,14 @@
                     {% endif %}
                 </div>
 
-                <span class="outfit text-4x1 font-medium">
+                <span class="outfit text-xl font-regular">
                     {% if user.is_authenticated %}
                     @{{ user.username }}
                     {% else %}
                     Anonymous
                     {% endif %}
                 </span>
+
             </div>
         </div>
     </div>

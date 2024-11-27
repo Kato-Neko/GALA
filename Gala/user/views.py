@@ -7,6 +7,8 @@ from django import forms
 from django.contrib import messages
 from user.models import Profile
 
+from eventcalendar.models import EventReminder
+
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={
         'placeholder': 'Enter your email',
@@ -104,4 +106,6 @@ def delete_account(request):
     return redirect('home')
 
 def home(request):
-    return render(request, 'home.html')
+    # Fetch all EventReminder objects
+    reminders = EventReminder.objects.all().order_by('date', 'start_time') 
+    return render(request, 'home.html', {'reminders': reminders})

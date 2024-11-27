@@ -1,3 +1,4 @@
+<!--suggestions.html-->
 {% load static %}
 
 <!DOCTYPE html>
@@ -6,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GALA Unified Layout</title>
+    <title>GALA</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,8 +16,12 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#FFC107',
-                        dark: '#00386d', /* Unified color */
+                        primary: '#00386d',
+                        dark: '#00386d',
+                        light: '#EAF4FA',
+                    },
+                    backgroundImage: {
+                        'gradient-dark': 'linear-gradient(to bottom right, #00386d, #005082)',
                     },
                 },
             },
@@ -33,11 +38,26 @@
         rel="stylesheet">
 </head>
 
-<body class="bg-gray-100" data-user-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
-    <div class="center-rectangle bg-dark shadow-lg p-10 rounded-lg">
-        <h2 class="outfit text-3xl font-regular whitespace-nowrap">
-            Events near you to <span class="lobster-two-bold text-4xl font-bold px-2"> GALA </span> at
+<body class="suggestions-page bg-gray-100"
+    data-user-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
+
+    <!-- Center Rectangle -->
+    <div class="center-rectangle bg-dark bg-opacity-90 shadow-xl p-10 rounded-2xl max-w-xl w-full">
+        <h2 class="outfit text-2xl font-regular text-primary text-center mb-6">
+            UPCOMING <span class="lobster-two-bold text-4xl font-bold text-white"> GALA </span> EVENTS NEAR YOU
         </h2>
+
+        <!-- Event List -->
+        <div class="mt-4 space-y-6">
+            {% for reminder in reminders %}
+            <div style="--index: {{ forloop.counter0 }}" class="event-item">
+                <h4>{{ reminder.description }}</h4>
+                <p class="event-date">{{ reminder.date }} at {{ reminder.start_time }}</p>
+            </div>
+            {% empty %}
+            <p class="text-center text-gray-300">No upcoming reminders.</p>
+            {% endfor %}
+        </div>
     </div>
 </body>
 
