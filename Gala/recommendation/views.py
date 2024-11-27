@@ -19,7 +19,8 @@ def add_location(request):
                     'id': location.id,
                     'name': location.name,
                     'description': location.description,
-                    'distance': location.distance,
+                    'longitude': location.longitude,
+                    'latitude': location.latitude,
                     'weather': location.weather,
                 }
             })
@@ -37,7 +38,8 @@ def edit_location(request, pk):
                     'id': location.id,
                     'name': location.name,
                     'description': location.description,
-                    'distance': location.distance,
+                    'longitude': location.longitude,
+                    'latitude': location.latitude,
                     'weather': location.weather,
                 }
             })

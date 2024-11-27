@@ -17,7 +17,10 @@
                         <input type="text" name="description" class="form-control" placeholder="Description" required>
                     </div>
                     <div class="col-md-2">
-                        <input type="text" name="distance" class="form-control" placeholder="Distance" required>
+                        <input type="text" name="longitude" class="form-control" placeholder="Longitude" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" name="latitude" class="form-control" placeholder="Latitude" required>
                     </div>
                     <div class="col-md-2">
                         <input type="text" name="weather" class="form-control" placeholder="Weather" required>
@@ -37,7 +40,8 @@
                 <tr>
                     <th>Name</th>
                     <th>Description</th>
-                    <th>Distance</th>
+                    <th>Longitude</th>
+                    <th>Latitude</th>
                     <th>Weather</th>
                     <th>Actions</th>
                 </tr>
@@ -47,7 +51,8 @@
                 <tr data-id="{{ location.id }}">
                     <td>{{ location.name }}</td>
                     <td>{{ location.description }}</td>
-                    <td>{{ location.distance }}</td>
+                    <td>{{ location.longitude }}</td>
+                    <td>{{ location.latitude }}</td>
                     <td>{{ location.weather }}</td>
                     <td>
                         <button class="btn btn-sm btn-warning edit-btn">Edit</button>
@@ -80,8 +85,12 @@
                         <input type="text" name="description" class="form-control" required>
                     </div>
                     <div class="form-group">
-                        <label>Distance</label>
-                        <input type="text" name="distance" class="form-control" required>
+                        <label>Longitude</label>
+                        <input type="text" name="longitude" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Latitude</label>
+                        <input type="text" name="latitude" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label>Weather</label>
@@ -115,7 +124,8 @@
                         <tr data-id="${location.id}">
                             <td>${location.name}</td>
                             <td>${location.description}</td>
-                            <td>${location.distance}</td>
+                            <td>${location.longitude}</td>
+                            <td>${location.latitude}</td>
                             <td>${location.weather}</td>
                             <td>
                                 <button class="btn btn-sm btn-warning edit-btn">Edit</button>
@@ -136,13 +146,15 @@
         const id = row.data('id');
         const name = row.find('td:eq(0)').text();
         const description = row.find('td:eq(1)').text();
-        const distance = row.find('td:eq(2)').text();
-        const weather = row.find('td:eq(3)').text();
+        const longitude = row.find('td:eq(2)').text();
+        const latitude = row.find('td:eq(3)').text();
+        const weather = row.find('td:eq(4)').text();
 
         $('#editForm [name="location_id"]').val(id);
         $('#editForm [name="name"]').val(name);
         $('#editForm [name="description"]').val(description);
-        $('#editForm [name="distance"]').val(distance);
+        $('#editForm [name="longitude"]').val(longitude);
+        $('#editForm [name="latitude"]').val(latitude);
         $('#editForm [name="weather"]').val(weather);
 
         $('#editModal').modal('show');
@@ -160,8 +172,9 @@
                     const row = $(`tr[data-id="${location.id}"]`);
                     row.find('td:eq(0)').text(location.name);
                     row.find('td:eq(1)').text(location.description);
-                    row.find('td:eq(2)').text(location.distance);
-                    row.find('td:eq(3)').text(location.weather);
+                    row.find('td:eq(2)').text(location.longitude);
+                    row.find('td:eq(3)').text(location.latitude);
+                    row.find('td:eq(4)').text(location.weather);
                     $('#editModal').modal('hide');
                 }
             }

@@ -1,20 +1,11 @@
-<!-- recommendation.html -->
 {% extends 'base.html' %}
 {% load static %}
 
-{% block menu %}
-    {% include 'menu.html' %}
-{% endblock %}
 
 {% block content %}
 <body class="imnida" style="background: linear-gradient(to bottom, #add8e6, #ffffff);">
-<div class="main-content" style="background: linear-gradient(to bottom, #add8e6, #ffffff); min-height: 100vh; position: relative; padding: 20px;">
-    <!-- Top-right Logo -->
-    <a href="/" style="position: absolute; top: 20px; right: 20px;">
-        <img src="{% static 'icons/logo.png' %}" alt="Logo" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid white; box-shadow: 0px 4px 6px rgba(0,0,0,0.2);">
-    </a>
-
-    <div class="container py-4">
+    <div class="main-content" style="background: linear-gradient(to bottom, #add8e6, #ffffff); min-height: 100vh; position: relative; padding: 20px;">
+       <div class="container py-4">
         <!-- Header Section -->
         <h1 class="text-center mb-4" style="color: #d83f3f; font-family: 'Merriweather', serif; font-weight: bold; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);">
             🎄 Location Recommendations 🎁
@@ -25,35 +16,33 @@
 
         <!-- Search Bar -->
         <div class="row justify-content-center mb-4">
-            <div class="col-md-6">
-                <form method="GET" class="search-form">
-                    <div class="input-group">
-                        <input type="text" name="search" class="form-control"
-                               placeholder="Search for locations..."
-                               value="{{ query }}" 
-                               style="border: 2px solid #ffffff; border-right: none; border-radius: 20px 0 0 20px; padding: 10px;">
-                        <div class="input-group-append">
-                            <button type="submit" class="btn" style="background-color: #ffffff; color: #d83f3f; border-radius: 0 20px 20px 0; font-weight: bold;">
-                                Search
-                            </button>
-                        </div>
-                    </div>
+            <div class="col-md-8">
+                <form method="GET" class="d-flex search-form">
+                    <input type="text" name="search" class="form-control"
+                           placeholder="Search for locations..."
+                           value="{{ query }}" 
+                           style="border: 2px solid #ffffff; border-right: none; border-radius: 20px 0 0 20px; padding: 10px; width: 1150px">
+                    <button type="submit" class="btn" 
+                            style="background-color: #ffffff; color: #d83f3f; border-radius: 0 20px 20px 0; font-weight: bold;">
+                        Search
+                    </button>
                 </form>
             </div>
         </div>
 
         <!-- Locations Grid -->
-        <div class="row">
+        <div class="row g-4 justify-content-start"> <!-- Added row class to contain the columns -->
             {% for location in locations %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm" style="border: 2px solid #ffffff; border-radius: 15px; background-color: rgba(255, 255, 255, 0.9);">
+            <div class="col-md-3 col-sm-4 mb-4"> <!-- Adjust column width here -->
+                <div class="card h-100 shadow-sm" style="border: 2px solid #ffffff; border-radius: 15px; background-color: rgba(255, 255, 255, 0.9);width: 375px;">
                     <div class="card-body" style="color: #333;">
                         <h5 class="card-title" style="color: #d83f3f; font-weight: bold; font-family: 'Merriweather', serif;">
                             {{ location.name }}
                         </h5>
                         <p class="card-text" style="font-style: italic;">{{ location.description }}</p>
                         <ul class="list-unstyled" style="font-size: 0.9rem;">
-                            <li><strong>Distance:</strong> {{ location.distance }}</li>
+                            <li><strong>Longitude:</strong> {{ location.longitude }}</li>
+                            <li><strong>Latitude:</strong> {{ location.latitude }}</li>
                             <li><strong>Weather:</strong> {{ location.weather }}</li>
                         </ul>
                     </div>
@@ -67,7 +56,9 @@
             </div>
             {% endfor %}
         </div>
-    </div>
-</div>
+            </div>
+        </div>
+    </div>  
+
 </body> 
 {% endblock %}
