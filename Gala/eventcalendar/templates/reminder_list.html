@@ -35,6 +35,9 @@
                     <h3 class="text-lg font-bold">{{ reminder.description }}</h3>
                     <p class="text-sm text-gray-600">Date: {{ reminder.date }}</p>
                     <p class="text-sm text-gray-600">Time: {{ reminder.start_time }} - {{ reminder.end_time }}</p>
+                    {% if reminder.longitude and reminder.latitude %}
+                    <p class="text-sm text-gray-600">Location: Latitude {{ reminder.latitude }}, Longitude {{ reminder.longitude }}</p>
+                    {% endif %}
                 </div>
             </li>
             {% empty %}
@@ -63,6 +66,12 @@
 
             <label for="end_time" class="block text-sm font-medium mb-2">End Time:</label>
             <input type="time" name="end_time" required class="w-full p-2 mb-4 border rounded-md">
+
+            <label for="longitude" class="block text-sm font-medium mb-2">Longitude:</label>
+            <input type="text" name="longitude" class="w-full p-2 mb-4 border rounded-md">
+
+            <label for="latitude" class="block text-sm font-medium mb-2">Latitude:</label>
+            <input type="text" name="latitude" class="w-full p-2 mb-4 border rounded-md">
 
             <input type="hidden" name="date" id="selected-date">
 
@@ -122,11 +131,14 @@
     function openViewModal(event) {
         const reminderDetails = document.getElementById('reminder-details');
         const endTime = event.end ? event.end.format('HH:mm') : 'No end time set';
+        const longitude = event.longitude ? event.longitude : 'Not provided';
+        const latitude = event.latitude ? event.latitude : 'Not provided';
 
         reminderDetails.innerHTML = `
             <p><strong>Description:</strong> ${event.title}</p>
             <p><strong>Date:</strong> ${event.start.format('YYYY-MM-DD')}</p>
             <p><strong>Time:</strong> ${event.start.format('HH:mm')} - ${endTime}</p>
+            <p><strong>Location:</strong> Latitude ${latitude}, Longitude ${longitude}</p>
         `;
 
         const editLink = document.getElementById('edit-reminder-link');
