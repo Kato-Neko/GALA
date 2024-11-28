@@ -5,7 +5,9 @@ class EventReminder(models.Model):
     description = models.CharField(max_length=200)
     start_time = models.TimeField()
     end_time = models.TimeField()
-    date = models.DateField(null=True, blank=True)      
+    date = models.DateField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)       
 
     def __str__(self):
         return self.description

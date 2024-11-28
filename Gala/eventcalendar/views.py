@@ -13,12 +13,16 @@ class ReminderListView(ListView):
         reminders = EventReminder.objects.all()
         events = [
             {
+                "id": reminder.event_reminder_id,
                 "title": reminder.description,
                 "start": f"{reminder.date}T{reminder.start_time}",
-                "end": f"{reminder.date}T{reminder.end_time}",
+                "end": f"{reminder.date}T{reminder.end_time}" if reminder.end_time else None,
+                "longitude": reminder.longitude if reminder.longitude is not None else "",
+                "latitude": reminder.latitude if reminder.latitude is not None else "",
             }
             for reminder in reminders
         ]
+
         context['events'] = events
         context['object_list'] = reminders
         return context
@@ -27,13 +31,13 @@ class ReminderListView(ListView):
 class ReminderCreateView(CreateView):
     model = EventReminder
     template_name = 'reminder_create.html'
-    fields = ['description', 'start_time', 'end_time', 'date']
+    fields = ['description', 'start_time', 'end_time', 'date', 'longitude', 'latitude']
     success_url = reverse_lazy('reminder-list')
 
 class ReminderUpdateView(UpdateView):
     model = EventReminder
     template_name = 'reminder_update.html'
-    fields = ['description', 'start_time', 'end_time']
+    fields = ['description', 'start_time', 'end_time', 'longitude', 'latitude']
     success_url = reverse_lazy('reminder-list')
 
 class ReminderDeleteView(DeleteView):
