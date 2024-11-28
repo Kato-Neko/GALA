@@ -50,14 +50,20 @@
         <!-- Event List -->
         <div class="mt-4 space-y-6">
             {% for reminder in reminders %}
-            <div style="--index: {{ forloop.counter0 }}" class="event-item">
-                <h4>{{ reminder.description }}</h4>
-                <p class="event-date">{{ reminder.date }} at {{ reminder.start_time }}</p>
+            <div style="--index: {{ forloop.counter0 }}" class="event-item group relative">
+                <h4 class="font-bold text-lg">{{ reminder.description }}</h4>
+                <p class="event-date group-hover:hidden">{{ reminder.date }} at {{ reminder.start_time }}</p>
+                <p class="event-location text-white hidden group-hover:block">
+                    Longitude: {{ reminder.longitude }}
+                    Latitude: {{ reminder.latitude }}
+                </p>
             </div>
             {% empty %}
             <p class="text-center text-gray-300">No upcoming reminders.</p>
             {% endfor %}
         </div>
+
+    </div>
     </div>
 </body>
 

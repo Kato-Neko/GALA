@@ -1,6 +1,11 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+
 from .models import EventReminder
+
+def get_place_name(latitude, longitude):
+        return "Sample Location"
+
 
 class ReminderListView(ListView):
     model = EventReminder
@@ -9,25 +14,26 @@ class ReminderListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Add events to the context for calendar
         reminders = EventReminder.objects.all()
-        events = [
-            {
+        events = []
+        for reminder in reminders:
+            latitude = reminder.latitude
+            longitude = reminder.longitude
+            location = get_place_name(latitude, longitude) 
+            print(f"DEBUG: Adding event with location '{location}'") 
+            events.append({
                 "id": reminder.event_reminder_id,
                 "title": reminder.description,
                 "start": f"{reminder.date}T{reminder.start_time}",
                 "end": f"{reminder.date}T{reminder.end_time}" if reminder.end_time else None,
-                "longitude": reminder.longitude if reminder.longitude is not None else "",
-                "latitude": reminder.latitude if reminder.latitude is not None else "",
-            }
-            for reminder in reminders
-        ]
-
-        context['events'] = events
-        context['object_list'] = reminders
+                "longitude": longitude,
+                "latitude": latitude,
+                "location": location,
+            })
+        context['reminders'] = events
         return context
 
-
+    
 class ReminderCreateView(CreateView):
     model = EventReminder
     template_name = 'reminder_create.html'
@@ -45,23 +51,3 @@ class ReminderDeleteView(DeleteView):
     template_name = 'reminder_delete.html'
     success_url = reverse_lazy('reminder-list')
 
-class HomeView(ListView):
-    model = EventReminder
-    template_name = 'home.html'  # This is the homepage template
-    context_object_name = 'reminders'  # Pass this to the context
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        # Add events to the context for dynamic modal population
-        reminders = EventReminder.objects.all()
-        events = [
-            {
-                "title": reminder.description,
-                "start": f"{reminder.date}T{reminder.start_time}",
-                "end": f"{reminder.date}T{reminder.end_time}",
-            }
-            for reminder in reminders
-        ]
-        context['events'] = events  # Passing events for JavaScript in home.html
-        return context
