@@ -1,7 +1,7 @@
 .suggestions-page .center-rectangle {
   position: absolute;
   left: 30px;
-  top: 20%;
+  top: 15%;
   width: 350px;
   padding: 20px;
   background: rgba(3, 2, 84, 0.2);
@@ -12,6 +12,14 @@
   z-index: 1000;
   animation: fadeIn 0.5s ease-in-out;
   transition: all 0.3s ease;
+  overflow: scroll;
+  scroll-behavior: initial;
+  height: 75%;
+  scrollbar-width: none; /* For Firefox */
+}
+
+.suggestions-page .center-rectangle::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, and Edge */
 }
 
 .suggestions-page .center-rectangle:hover {
@@ -71,7 +79,7 @@
   background: linear-gradient(to right, #00386d, #005082);
   border-radius: 4px;
   margin-bottom: 10px;
-  transition: background 0.3s ease; /* Smooth transition for color change */
+  transition: background 0.3s ease;
 }
 
 /* Change the gradient of the line when hovering over the event item */
@@ -81,6 +89,15 @@
     #ffffff,
     #00386d
   ); /* Reversed gradient on hover */
+}
+
+.suggestions-page .event-location {
+  color: #00386d; /* Initial color */
+  transition: color 0.3s ease; /* Smooth transition for color change */
+}
+
+.suggestions-page .event-item:hover .event-location {
+  color: #ffffff; /* Change to white on hover */
 }
 
 @media screen and (max-width: 768px) {

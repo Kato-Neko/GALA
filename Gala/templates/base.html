@@ -12,6 +12,9 @@
     <title>{% block title %}GALA{% endblock %}</title>
     <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/x-icon">
 
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -60,6 +63,30 @@
     function closeDeleteModal() {
         document.getElementById("deleteModal").classList.add("hidden");
         document.getElementById("deleteModal").classList.remove("flex");
+    }
+
+    function openUpdateModal() {
+        document.getElementById("updateModal").classList.remove("hidden");
+        document.getElementById("updateModal").classList.add("flex");
+    }
+
+    function closeUpdateModal() {
+        document.getElementById("updateModal").classList.add("hidden");
+        document.getElementById("updateModal").classList.remove("flex");
+    }
+
+    document.getElementById('updateModal').addEventListener('submit', function (event) {
+        event.preventDefault();
+        document.getElementById('update-account-form').submit();
+    });
+
+    function confirmUpdate() {
+        const form = document.getElementById('update-account-form'); // Targeting the form explicitly
+        if (form) {
+            form.submit(); // Submit the form for update
+        } else {
+            console.error("Form not found.");
+        }
     }
 </script>
 {% endblock %}

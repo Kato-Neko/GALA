@@ -160,4 +160,53 @@
             openAuthModal(false, { username: prefillUsername });
         }
     });
+
+    document.getElementById('login-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        const response = await fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            window.location.href = result.redirect_url;
+        } else {
+            const errorBox = document.getElementById('login-error');
+            errorBox.textContent = result.error;
+            errorBox.style.display = 'block';
+        }
+    });
+
+    document.getElementById('signup-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        const response = await fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            window.location.href = result.redirect_url;
+        } else {
+            const errors = JSON.parse(result.errors);
+            const errorBox = document.getElementById('signup-error');
+            errorBox.innerHTML = Object.values(errors)
+                .map(errorList => errorList.map(error => `<p>${error.message}</p>`).join(''))
+                .join('');
+            errorBox.style.display = 'block';
+        }
+    });
 </script>
