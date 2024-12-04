@@ -7,9 +7,11 @@ from django import forms
 from django.contrib import messages
 from user.models import Profile
 from django.http import JsonResponse
+from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import render
 
 from eventcalendar.models import EventReminder
+import json
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={
@@ -117,5 +119,16 @@ def delete_account(request):
 
 def home(request):
     # Fetch all EventReminder objects
-    reminders = EventReminder.objects.all().order_by('date', 'start_time') 
-    return render(request, 'home.html', {'reminders': reminders})
+    reminders = EventReminder.objects.all()
+    reminders_data = [
+        {
+            "description": reminder.description,
+            "latitude": reminder.latitude,
+            "longitude": reminder.longitude,
+        }
+        for reminder in reminders
+    ]
+    return render(request, 'home.html', {
+        'reminders': reminders,
+        'reminders_json': json.dumps(reminders_data, cls=DjangoJSONEncoder)
+    })

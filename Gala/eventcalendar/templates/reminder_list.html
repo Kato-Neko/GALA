@@ -13,7 +13,7 @@
             <div class=" mt-4 space-y-6">
                 {% for reminder in object_list|dictsort:"date" %}
                 <div style="background: rgb(255, 255, 255); --index: {{ forloop.counter0 }}"
-                    class="event-item group relative p-3 rounded-2xl">
+                    class="event-item group relative p-4 rounded-2xl">
                     <h4 class="font-bold text-lg">{{ reminder.description }}</h4>
                     <p>{{ reminder.date }} at {{ reminder.start_time }}</p>
                     <p> Longitude: {{ reminder.longitude }}
@@ -27,9 +27,13 @@
         </div>
 
         <!-- Calendar -->
-        <div id="calendar" class="col-span-3 shadow-xl mt-5 p-5 rounded-2xl pb-5 w-auto h-[700px] overflow-hidden"
+        <div id="calendar-container"
+            class="col-span-3 shadow-xl mt-5 p-5 rounded-2xl pb-7 flex justify-center items-center w-auto h-[700px] overflow-hidden"
             style="background: rgba(3, 2, 84, 0.4); color:rgba(255, 255, 255, 1);">
+            <div id="calendar">
+            </div>
         </div>
+
     </div>
 </div>
 
