@@ -51,14 +51,16 @@
 
 
             <!-- User Info (Profile Picture and Username, pushed to the right) -->
-            <div class="flex items-center gap-3 text-white">
+            <div class="flex items-center h-full gap-2 text-white">
+                <!-- Profile container -->
                 <div
-                    class="avatar w-full h-full rounded-full overflow-hidden bg-gray-200 border-2 border-white flex items-center justify-center">
+                    class="avatar w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-1 border-white flex items-center justify-center">
                     {% if user.is_authenticated and user.profile.profile_picture %}
-                    <img alt="Profile Picture" src="{{ user.profile.profile_picture.url }}"
-                        class="object-cover w-full h-full" />
+                    <!-- Set the image size specifically to avoid the border growing -->
+                    <img class="w-20 h-20 object-cover rounded-full ring-1 ring-gray-300 dark:ring-gray-500"
+                        src="{{ user.profile.profile_picture.url }}">
                     {% else %}
-                    <div class="w-10 h-10 flex items-center justify-center bg-gray-300">
+                    <div class="w-20 h-20 flex items-center justify-center bg-gray-300">
                         <span class="text-xl font-medium text-gray-600">?</span>
                     </div>
                     {% endif %}
@@ -136,7 +138,7 @@
             {% if user.is_authenticated %}
             <ul tabindex="0"
                 class="dropdown-content menu bg-dark text-white rounded-t-lg z-50 w-52 p-5 shadow-lg absolute bottom-[calc(100%+1rem)] right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <li><a href="/account_management" class="rounded">Manage Account</a></li>
+                <li><a href="/manageaccount" class="rounded">Manage Account</a></li>
                 <li><a href="/logout" class=" rounded-md">Log Out</a></li>
             </ul>
             {% endif %}

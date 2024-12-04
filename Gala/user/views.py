@@ -6,8 +6,12 @@ from django.contrib.auth.models import User
 from django import forms
 from django.contrib import messages
 from user.models import Profile
+from django.http import JsonResponse
+from django.core.serializers.json import DjangoJSONEncoder
+from django.shortcuts import render
 
 from eventcalendar.models import EventReminder
+import json
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={
@@ -34,11 +38,11 @@ def custom_login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            messages.success(request, 'Welcome back, {}!'.format(user.username))
+            messages.success(request, f'Welcome back, {user.username}!')
             next_url = request.POST.get('next') or request.GET.get('next') or '/'
-            return redirect(next_url)
+            return JsonResponse({'success': True, 'redirect_url': next_url})
         else:
-            messages.error(request, 'Invalid username or password. Please try again.')
+            return JsonResponse({'success': False, 'error': 'Invalid username or password. Please try again.'})
 
     return render(request, 'authmodal.html')
 
@@ -46,17 +50,20 @@ def signup_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save() 
+            user = form.save()
             messages.success(request, 'Account created successfully! You can now log in.')
-
-            return redirect(f"/?prefill_username={form.cleaned_data['username']}")
+            return JsonResponse({'success': True, 'redirect_url': '/'})
         else:
-            messages.error(request, 'Please fix the errors below and try again.')
+            # Return the form errors as a JSON response
+            errors = {}
+            for field, field_errors in form.errors.items():
+                errors[field] = [{"message": error} for error in field_errors]
+            return JsonResponse({'success': False, 'errors': errors})
+
     else:
         form = CustomUserCreationForm()
 
     return render(request, 'authmodal.html', {'form': form, 'signup_mode': True})
-
 
 @login_required
 def custom_logout(request):
@@ -64,12 +71,13 @@ def custom_logout(request):
     return redirect('home')
 
 @login_required
-def account_management(request):
+def manage_account(request):
     user = request.user
 
     profile, created = Profile.objects.get_or_create(user=user)
 
     if request.method == 'POST':
+        email = request.POST.get('email')
         username = request.POST.get('username')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
@@ -78,13 +86,16 @@ def account_management(request):
 
         if username and username != user.username:
             user.username = username
+        if email and email!= user.email:
+            user.email = email
         if first_name and first_name != user.first_name:
             user.first_name = first_name
         if last_name and last_name != user.last_name:
             user.last_name = last_name
         if password:
             user.set_password(password)
-            login(request, user)
+            # Removed the login call here to prevent unintentional re-login
+            messages.success(request, "Password updated, please log in again.")
 
         user.save()
 
@@ -93,9 +104,10 @@ def account_management(request):
             profile.save()
 
         messages.success(request, "Account updated successfully!")
-        return redirect('account_management') 
+        return redirect('home') 
 
-    return render(request, 'account_management.html', {'user': user, 'profile': profile})
+    return render(request, 'manageaccount.php', {'user': user, 'profile': profile})
+
 
 @login_required
 def delete_account(request):
@@ -107,5 +119,16 @@ def delete_account(request):
 
 def home(request):
     # Fetch all EventReminder objects
-    reminders = EventReminder.objects.all().order_by('date', 'start_time') 
-    return render(request, 'home.html', {'reminders': reminders})
+    reminders = EventReminder.objects.all()
+    reminders_data = [
+        {
+            "description": reminder.description,
+            "latitude": reminder.latitude,
+            "longitude": reminder.longitude,
+        }
+        for reminder in reminders
+    ]
+    return render(request, 'home.html', {
+        'reminders': reminders,
+        'reminders_json': json.dumps(reminders_data, cls=DjangoJSONEncoder)
+    })

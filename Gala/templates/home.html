@@ -7,8 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GALA</title>
-
-
+    <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/x-icon">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -35,24 +34,72 @@
     <!-- Map Container -->
     <div id="map"></div>
 
-    <!-- Include Suggestions Modal -->
+    <!-- Include Modals -->
     {% include 'suggestions.html' %}
     {% include 'menu.html' %}
-
+    {% include 'marker.html' %}
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // Initialize the map
-        var map = L.map('map').setView([10.3157, 123.3854], 10); // Cebu Island coordinates
+        var map = L.map('map').setView([10.3157, 123.6154], 10); // Cebu Island coordinates
 
         // Add OpenStreetMap tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
-    </script>
 
+        var customIcon = L.icon({
+            iconUrl: "{% static 'images/favicon.png' %}",
+            iconSize: [70, 70], // Adjust width and height
+            iconAnchor: [20, 60], // Point of the icon which will correspond to marker's location
+            shadowUrl: "{% static 'images/marker-shadow.png' %}", // Shadow image
+            shadowSize: [60, 60], // Size of the shadow
+            shadowAnchor: [15, 50], // Anchor point for the shadow (same as the icon)
+            popupAnchor: [0, -50], // Point where the popup will open relative to the icon anchor
+        });
+
+        // Retrieve reminders data from the backend
+        var reminders = JSON.parse('{{ reminders_json|escapejs }}');
+
+        // Add pins for each reminder
+        reminders.forEach(reminder => {
+            if (reminder.latitude && reminder.longitude) {
+                var marker = L.marker([reminder.latitude, reminder.longitude], { icon: customIcon }).addTo(map);
+
+                // Add click event to marker
+                marker.on('click', function () {
+                    // Populate the modal dynamically
+                    document.getElementById('modalContent').innerHTML = `
+                        <h2 class="text-xl font-bold mb-4">Reminder Details</h2>
+                        <p><strong>Description:</strong> ${reminder.description}</p>
+                        <p><strong>Latitude:</strong> ${reminder.latitude}</p>
+                        <p><strong>Longitude:</strong> ${reminder.longitude}</p>
+                    `;
+
+                    // Get the map's container point of the marker's position
+                    var point = map.latLngToContainerPoint(marker.getLatLng());
+
+                    // Set modal position relative to the marker's position
+                    var modal = document.getElementById('popupModal');
+                    modal.style.left = `${point.x + 10}px`; // Positioning 10px to the right of the marker
+                    modal.style.top = `${point.y - 40}px`; // Positioning 40px above the marker
+
+                    // Show the modal
+                    modal.classList.remove('hidden');
+                });
+            }
+        });
+
+        function closeModal(event) {
+            // Close the modal only if the click was outside the modal content
+            if (event.target === document.getElementById('popupModal')) {
+                document.getElementById('popupModal').classList.add('hidden');
+            }
+        }
+    </script>
 </body>
 
 </html>
