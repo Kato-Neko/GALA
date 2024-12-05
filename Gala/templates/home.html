@@ -53,8 +53,8 @@
 
         var customIcon = L.icon({
             iconUrl: "{% static 'images/favicon.png' %}",
-            iconSize: [70, 70], // Adjust width and height
-            iconAnchor: [20, 60], // Point of the icon which will correspond to marker's location
+            iconSize: [60, 60], // Adjust width and height
+            iconAnchor: [15, 50], // Point of the icon which will correspond to marker's location
             shadowUrl: "{% static 'images/marker-shadow.png' %}", // Shadow image
             shadowSize: [60, 60], // Size of the shadow
             shadowAnchor: [15, 50], // Anchor point for the shadow (same as the icon)
@@ -64,6 +64,9 @@
         // Retrieve reminders data from the backend
         var reminders = JSON.parse('{{ reminders_json|escapejs }}');
 
+        // Track the currently open modal
+        var currentlyOpenModal = null;
+
         // Add pins for each reminder
         reminders.forEach(reminder => {
             if (reminder.latitude && reminder.longitude) {
@@ -71,34 +74,48 @@
 
                 // Add click event to marker
                 marker.on('click', function () {
-                    // Populate the modal dynamically
-                    document.getElementById('modalContent').innerHTML = `
-                        <h2 class="text-xl font-bold mb-4">Reminder Details</h2>
-                        <p><strong>Description:</strong> ${reminder.description}</p>
-                        <p><strong>Latitude:</strong> ${reminder.latitude}</p>
-                        <p><strong>Longitude:</strong> ${reminder.longitude}</p>
-                    `;
-
-                    // Get the map's container point of the marker's position
-                    var point = map.latLngToContainerPoint(marker.getLatLng());
-
-                    // Set modal position relative to the marker's position
+                    // Get modal element
                     var modal = document.getElementById('popupModal');
-                    modal.style.left = `${point.x + 10}px`; // Positioning 10px to the right of the marker
-                    modal.style.top = `${point.y - 40}px`; // Positioning 40px above the marker
 
-                    // Show the modal
-                    modal.classList.remove('hidden');
+                    // Check if the modal is already open and associated with this marker
+                    if (currentlyOpenModal === marker) {
+                        // Close the modal
+                        modal.classList.add('hidden');
+                        currentlyOpenModal = null; // Reset the currently open modal
+                    } else {
+                        // Populate the modal dynamically
+                        document.getElementById('modalContent').innerHTML = `
+                    <h2 class="text-xl font-bold mb-4">Reminder Details</h2>
+                    <p><strong>Description:</strong> ${reminder.description}</p>
+                    <p><strong>Latitude:</strong> ${reminder.latitude}</p>
+                    <p><strong>Longitude:</strong> ${reminder.longitude}</p>
+                `;
+
+                        // Get the map's container point of the marker's position
+                        var point = map.latLngToContainerPoint(marker.getLatLng());
+
+                        // Set modal position relative to the marker's position
+                        modal.style.left = `${point.x + 10}px`; // Positioning 10px to the right of the marker
+                        modal.style.top = `${point.y - 40}px`; // Positioning 40px above the marker
+
+                        // Show the modal
+                        modal.classList.remove('hidden');
+
+                        // Update the currently open modal
+                        currentlyOpenModal = marker;
+                    }
                 });
             }
         });
 
+        // Function to close the modal when clicking outside it
         function closeModal(event) {
-            // Close the modal only if the click was outside the modal content
             if (event.target === document.getElementById('popupModal')) {
                 document.getElementById('popupModal').classList.add('hidden');
+                currentlyOpenModal = null; // Reset the currently open modal
             }
         }
+
     </script>
 </body>
 
