@@ -19,6 +19,7 @@ class ReminderListView(ListView):
                 "end": f"{reminder.date}T{reminder.end_time}" if reminder.end_time else None,
                 "longitude": reminder.longitude if reminder.longitude is not None else "",
                 "latitude": reminder.latitude if reminder.latitude is not None else "",
+                "image": reminder.image.url if reminder.image else "",
             }
             for reminder in reminders
         ]
@@ -31,14 +32,29 @@ class ReminderListView(ListView):
 class ReminderCreateView(CreateView):
     model = EventReminder
     template_name = 'reminder_create.html'
-    fields = ['description', 'start_time', 'end_time', 'date', 'longitude', 'latitude']
+    fields = ['description', 'start_time', 'end_time', 'date', 'longitude', 'latitude', 'image']  # Include 'image'
     success_url = reverse_lazy('reminder-list')
+
+    def form_valid(self, form):
+        # Additional processing if required
+        return super().form_valid(form)
+
+
+from django.views.generic import UpdateView
+from .models import EventReminder
 
 class ReminderUpdateView(UpdateView):
     model = EventReminder
+    fields = ['description', 'start_time', 'end_time', 'date', 'longitude', 'latitude', 'image']  # Include 'image'
     template_name = 'reminder_update.html'
-    fields = ['description', 'start_time', 'end_time', 'longitude', 'latitude']
     success_url = reverse_lazy('reminder-list')
+
+    def form_valid(self, form):
+        # Handle existing image if no new one is uploaded
+        if 'image' not in self.request.FILES:
+            form.instance.image = self.get_object().image
+        return super().form_valid(form)
+
 
 class ReminderDeleteView(DeleteView):
     model = EventReminder
@@ -60,6 +76,7 @@ class HomeView(ListView):
                 "title": reminder.description,
                 "start": f"{reminder.date}T{reminder.start_time}",
                 "end": f"{reminder.date}T{reminder.end_time}",
+                "image": reminder.image.url if reminder.image else "",
             }
             for reminder in reminders
         ]

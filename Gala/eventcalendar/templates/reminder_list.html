@@ -7,24 +7,30 @@
         <div class="col-span-1">
         </div>
 
-        <div class="center-rectangle col-span-2 shadow-xl p-10 rounded-2xl max-w-xl h-full w-full"
-            style="background: rgba(3, 2, 84, 0.4);">
-            <!-- Event List -->
-            <div class=" mt-4 space-y-6">
-                {% for reminder in object_list|dictsort:"date" %}
-                <div style="background: rgb(255, 255, 255); --index: {{ forloop.counter0 }}"
-                    class="event-item group relative p-4 rounded-2xl">
-                    <h4 class="font-bold text-lg">{{ reminder.description }}</h4>
-                    <p>{{ reminder.date }} at {{ reminder.start_time }}</p>
-                    <p> Longitude: {{ reminder.longitude }}
-                        Latitude: {{ reminder.latitude }}
-                    </p>
-                </div>
-                {% empty %}
-                <p class="text-center text-gray-300">No upcoming reminders.</p>
-                {% endfor %}
-            </div>
+        <div class="center-rectangle col-span-2 shadow-xl p-10 rounded-2xl max-w-xl h-full w-full relative"
+    style="background: rgba(3, 2, 84, 0.4);">
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black bg-opacity-40 rounded-2xl z-0"></div>
+
+    <!-- Scrollable Event List -->
+    <div class="relative mt-4 space-y-6 h-full overflow-y-auto z-10">
+        {% for reminder in object_list|dictsort:"date" %}
+        <div class="event-item group relative p-4 rounded-2xl"
+            style="background: rgb(255, 255, 255); --index: {{ forloop.counter0 }}">
+            {% if reminder.image %}
+            <img src="{{ reminder.image.url }}" alt="{{ reminder.description }}"
+                class="w-full h-32 object-cover rounded-lg mb-4">
+            {% endif %}
+            <h4 class="font-bold text-lg">{{ reminder.description }}</h4>
+            <p>{{ reminder.date }} at {{ reminder.start_time }}</p>
+            <p>Longitude: {{ reminder.longitude }} Latitude: {{ reminder.latitude }}</p>
         </div>
+        {% empty %}
+        <p class="text-center text-gray-300">No upcoming reminders.</p>
+        {% endfor %}
+    </div>
+</div>
+
 
         <!-- Calendar -->
         <div id="calendar-container"
@@ -41,27 +47,30 @@
 <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" id="reminder-modal">
     <div class="bg-white p-8 rounded-lg shadow-lg max-w-sm w-full">
         <h2 class="text-xl font-bold mb-4">Create Reminder</h2>
-        <form method="post" action="{% url 'reminder-create' %}" id="reminder-form">
+        <form method="post" action="{% url 'reminder-create' %}" id="reminder-form" enctype="multipart/form-data"> <!-- Add enctype -->
             {% csrf_token %}
             <label for="description" class="block text-sm font-medium mb-2">Description:</label>
             <input type="text" name="description" required class="w-full p-2 mb-4 border rounded-md">
-
+        
             <label for="start_time" class="block text-sm font-medium mb-2">Start Time:</label>
             <input type="time" name="start_time" required class="w-full p-2 mb-4 border rounded-md">
-
+        
             <label for="end_time" class="block text-sm font-medium mb-2">End Time:</label>
             <input type="time" name="end_time" required class="w-full p-2 mb-4 border rounded-md">
-
+        
             <label for="longitude" class="block text-sm font-medium mb-2">Longitude:</label>
             <input type="text" name="longitude" class="w-full p-2 mb-4 border rounded-md">
-
+        
             <label for="latitude" class="block text-sm font-medium mb-2">Latitude:</label>
             <input type="text" name="latitude" class="w-full p-2 mb-4 border rounded-md">
-
+        
+            <label for="image" class="block text-sm font-medium mb-2">Upload Image:</label>
+            <input type="file" name="image" class="w-full p-2 mb-4 border rounded-md"> <!-- Add this -->
+        
             <input type="hidden" name="date" id="selected-date">
-
+        
             <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-700">Save</button>
-        </form>
+        </form>        
         <button class="w-full mt-4 bg-red-500 text-white py-2 rounded-md hover:bg-red-700"
             onclick="closeCreateModal()">Close</button>
     </div>
