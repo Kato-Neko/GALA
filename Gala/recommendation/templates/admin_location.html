@@ -1,62 +1,61 @@
 {% extends 'base-recommendation.html' %}
-<!-- admin_location.html -->
 {% block content %}
-<div class="container mt-4">
-    <h2>Manage Locations</h2>
+<div class="container mx-auto p-6">
+    <h2 class="text-2xl font-semibold mb-6 text-center text-gray-800">Manage Locations</h2>
 
     <!-- Add Location Form -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form id="locationForm" method="POST">
-                {% csrf_token %}
-                <div class="row">
-                    <div class="col-md-3">
-                        <input type="text" name="name" class="form-control" placeholder="Location Name" required>
-                    </div>
-                    <div class="col-md-3">
-                        <input type="text" name="description" class="form-control" placeholder="Description" required>
-                    </div>
-                    <div class="col-md-2">
-                        <input type="text" name="longitude" class="form-control" placeholder="Longitude" required>
-                    </div>
-                    <div class="col-md-2">
-                        <input type="text" name="latitude" class="form-control" placeholder="Latitude" required>
-                    </div>
-                    <div class="col-md-2">
-                        <input type="text" name="weather" class="form-control" placeholder="Weather" required>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100">Add Location</button>
-                    </div>
-                </div>
-            </form>
-        </div>
+    <div class="bg-white shadow-md rounded-lg mb-6 p-6">
+        <form id="locationForm" method="POST" class="space-y-4">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input type="text" name="name"
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Location Name" required>
+                <input type="text" name="description"
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Description" required>
+                <input type="text" name="longitude"
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Longitude" required>
+                <input type="text" name="latitude"
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Latitude" required>
+                <input type="text" name="weather"
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Weather" required>
+                <button type="submit"
+                    class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition duration-200">Add
+                    Location</button>
+            </div>
+        </form>
     </div>
 
     <!-- Locations Table -->
-    <div class="table-responsive">
-        <table class="table table-bordered">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Longitude</th>
-                    <th>Latitude</th>
-                    <th>Weather</th>
-                    <th>Actions</th>
+    <div class="bg-white shadow-md rounded-lg overflow-x-auto">
+        <table class="w-full border-collapse">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="text-left p-4 border-b font-medium text-gray-600">Name</th>
+                    <th class="text-left p-4 border-b font-medium text-gray-600">Description</th>
+                    <th class="text-left p-4 border-b font-medium text-gray-600">Longitude</th>
+                    <th class="text-left p-4 border-b font-medium text-gray-600">Latitude</th>
+                    <th class="text-left p-4 border-b font-medium text-gray-600">Weather</th>
+                    <th class="text-center p-4 border-b font-medium text-gray-600">Actions</th>
                 </tr>
             </thead>
             <tbody id="locationTableBody">
                 {% for location in locations %}
-                <tr data-id="{{ location.id }}">
-                    <td>{{ location.name }}</td>
-                    <td>{{ location.description }}</td>
-                    <td>{{ location.longitude }}</td>
-                    <td>{{ location.latitude }}</td>
-                    <td>{{ location.weather }}</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning edit-btn">Edit</button>
-                        <button class="btn btn-sm btn-danger delete-btn">Delete</button>
+                <tr data-id="{{ location.id }}" class="hover:bg-gray-50">
+                    <td class="p-4 border-b text-gray-700">{{ location.name }}</td>
+                    <td class="p-4 border-b text-gray-700">{{ location.description }}</td>
+                    <td class="p-4 border-b text-gray-700">{{ location.longitude }}</td>
+                    <td class="p-4 border-b text-gray-700">{{ location.latitude }}</td>
+                    <td class="p-4 border-b text-gray-700">{{ location.weather }}</td>
+                    <td class="p-4 border-b text-center">
+                        <button
+                            class="edit-btn bg-yellow-400 hover:bg-yellow-500 text-white py-1 px-3 rounded-lg font-semibold transition duration-200">Edit</button>
+                        <button
+                            class="delete-btn bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-lg font-semibold transition duration-200">Delete</button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -66,50 +65,68 @@
 </div>
 
 <!-- Edit Modal -->
-<div class="modal fade" id="editModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Edit Location</h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="editForm">
-                    <input type="hidden" name="location_id">
-                    <div class="form-group">
-                        <label>Name</label>
-                        <input type="text" name="name" class="form-control" required>
+<div id="editModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden">
+    <div class="bg-white rounded-lg shadow-lg w-11/12 md:w-1/2">
+        <div class="border-b p-4 flex justify-between items-center">
+            <h5 class="text-xl font-semibold">Edit Location</h5>
+            <button class="text-gray-500 hover:text-gray-700"
+                onclick="document.getElementById('editModal').classList.add('hidden');">&times;</button>
+        </div>
+        <div class="p-6">
+            <form id="editForm" class="space-y-4">
+                <input type="hidden" name="location_id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Name</label>
+                        <input type="text" name="name"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                            required>
                     </div>
-                    <div class="form-group">
-                        <label>Description</label>
-                        <input type="text" name="description" class="form-control" required>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Description</label>
+                        <input type="text" name="description"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                            required>
                     </div>
-                    <div class="form-group">
-                        <label>Longitude</label>
-                        <input type="text" name="longitude" class="form-control" required>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Longitude</label>
+                        <input type="text" name="longitude"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                            required>
                     </div>
-                    <div class="form-group">
-                        <label>Latitude</label>
-                        <input type="text" name="latitude" class="form-control" required>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Latitude</label>
+                        <input type="text" name="latitude"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                            required>
                     </div>
-                    <div class="form-group">
-                        <label>Weather</label>
-                        <input type="text" name="weather" class="form-control" required>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Weather</label>
+                        <input type="text" name="weather"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                            required>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="saveEdit">Save changes</button>
-            </div>
+                </div>
+            </form>
+        </div>
+        <div class="border-t p-4 flex justify-end">
+            <button
+                class="btn-cancel bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg font-semibold mr-2 transition duration-200"
+                onclick="document.getElementById('editModal').classList.add('hidden');">Close</button>
+            <button id="saveEdit"
+                class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold transition duration-200">Save
+                Changes</button>
         </div>
     </div>
 </div>
 
-{% endblock %}
-
 {% block extra_js %}
 <script>
+    // Show Modal
+    function showModal(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+    }
+
     // Add Location
     $('#locationForm').on('submit', function (e) {
         e.preventDefault();
@@ -122,14 +139,14 @@
                     const location = response.location;
                     const newRow = `
                         <tr data-id="${location.id}">
-                            <td>${location.name}</td>
-                            <td>${location.description}</td>
-                            <td>${location.longitude}</td>
-                            <td>${location.latitude}</td>
-                            <td>${location.weather}</td>
-                            <td>
-                                <button class="btn btn-sm btn-warning edit-btn">Edit</button>
-                                <button class="btn btn-sm btn-danger delete-btn">Delete</button>
+                            <td class="p-4 border-b text-gray-700">${location.name}</td>
+                            <td class="p-4 border-b text-gray-700">${location.description}</td>
+                            <td class="p-4 border-b text-gray-700">${location.longitude}</td>
+                            <td class="p-4 border-b text-gray-700">${location.latitude}</td>
+                            <td class="p-4 border-b text-gray-700">${location.weather}</td>
+                            <td class="p-4 border-b text-center">
+                                <button class="edit-btn bg-yellow-400 hover:bg-yellow-500 text-white py-1 px-3 rounded-lg font-semibold transition duration-200">Edit</button>
+                                <button class="delete-btn bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-lg font-semibold transition duration-200">Delete</button>
                             </td>
                         </tr>
                     `;
@@ -157,25 +174,25 @@
         $('#editForm [name="latitude"]').val(latitude);
         $('#editForm [name="weather"]').val(weather);
 
-        $('#editModal').modal('show');
+        showModal('editModal');
     });
 
     $('#saveEdit').on('click', function () {
         const id = $('#editForm [name="location_id"]').val();
         $.ajax({
-            url: `/edit-location/${id}/`, // Fixed URL
+            url: `{% url 'edit_location' pk=0 %}`.replace('0', id), // Dynamic URL generation
             method: 'POST',
             data: $('#editForm').serialize() + '&csrfmiddlewaretoken=' + $('[name=csrfmiddlewaretoken]').val(),
             success: function (response) {
                 if (response.status === 'success') {
                     const location = response.location;
-                    const row = $(`tr[data-id="${location.id}"]`); // Fixed selector
+                    const row = $(`tr[data-id="${location.id}"]`);
                     row.find('td:eq(0)').text(location.name);
                     row.find('td:eq(1)').text(location.description);
                     row.find('td:eq(2)').text(location.longitude);
                     row.find('td:eq(3)').text(location.latitude);
                     row.find('td:eq(4)').text(location.weather);
-                    $('#editModal').modal('hide');
+                    document.getElementById('editModal').classList.add('hidden');
                 }
             }
         });
@@ -187,7 +204,7 @@
             const row = $(this).closest('tr');
             const id = row.data('id');
             $.ajax({
-                url: `/delete-location/${id}/`, // Fixed URL
+                url: `{% url 'delete_location' pk=0 %}`.replace('0', id), // Dynamic URL generation
                 method: 'POST',
                 data: {
                     csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
@@ -202,4 +219,4 @@
     });
 </script>
 {% endblock %}
-<!--Daylily Movements-->
+{% endblock %}
