@@ -35,7 +35,7 @@
     <div id="map"></div>
 
     <!-- Include Modals -->
-    {% include 'suggestions.html' %}
+    {% include 'suggestions.html' with combined_list=combined_list %}
     {% include 'menu.html' %}
     {% include 'marker.html' %}
 
@@ -51,6 +51,7 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
+        // Define custom icon
         var customIcon = L.icon({
             iconUrl: "{% static 'images/favicon.png' %}",
             iconSize: [60, 60], // Adjust width and height
@@ -61,54 +62,25 @@
             popupAnchor: [0, -50], // Point where the popup will open relative to the icon anchor
         });
 
-        // Retrieve reminders data from the backend
-        var reminders = JSON.parse('{{ reminders_json|escapejs }}');
+        // Retrieve combined data from the backend
+        var combinedList = JSON.parse('{{ combined_list_json|escapejs }}');
 
-        // Track the currently open modal
-        var currentlyOpenModal = null;
+        // Add markers for each item in combinedList
+        combinedList.forEach(item => {
+            const { latitude, longitude, type, description, name } = item;
 
-        // Add pins for each reminder
-        reminders.forEach(reminder => {
-            if (reminder.latitude && reminder.longitude) {
-                var marker = L.marker([reminder.latitude, reminder.longitude], { icon: customIcon }).addTo(map);
+            // Create popup content based on the type
+            const popupContent = `
+                <strong>Type:</strong> ${type === 'reminder' ? 'Reminder' : 'Location'}<br>
+                <strong>${type === 'reminder' ? 'Description' : 'Name'}:</strong> ${type === 'reminder' ? description : name}
+            `;
 
-                // Add click event to marker
-                marker.on('click', function () {
-                    // Get modal element
-                    var modal = document.getElementById('popupModal');
-
-                    // Check if the modal is already open and associated with this marker
-                    if (currentlyOpenModal === marker) {
-                        // Close the modal
-                        modal.classList.add('hidden');
-                        currentlyOpenModal = null; // Reset the currently open modal
-                    } else {
-                        // Populate the modal dynamically
-                        document.getElementById('modalContent').innerHTML = `
-                    <h2 class="text-xl font-bold mb-4">Reminder Details</h2>
-                    <p><strong>Description:</strong> ${reminder.description}</p>
-                    <p><strong>Latitude:</strong> ${reminder.latitude}</p>
-                    <p><strong>Longitude:</strong> ${reminder.longitude}</p>
-                `;
-
-                        // Get the map's container point of the marker's position
-                        var point = map.latLngToContainerPoint(marker.getLatLng());
-
-                        // Set modal position relative to the marker's position
-                        modal.style.left = `${point.x + 10}px`; // Positioning 10px to the right of the marker
-                        modal.style.top = `${point.y - 40}px`; // Positioning 40px above the marker
-
-                        // Show the modal
-                        modal.classList.remove('hidden');
-
-                        // Update the currently open modal
-                        currentlyOpenModal = marker;
-                    }
-                });
-            }
+            // Add marker to the map
+            L.marker([latitude, longitude], { icon: customIcon })
+                .addTo(map)
+                .bindPopup(popupContent);
         });
 
-        // Function to close the modal when clicking outside it
         function closeModal(event) {
             if (event.target === document.getElementById('popupModal')) {
                 document.getElementById('popupModal').classList.add('hidden');

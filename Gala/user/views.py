@@ -120,6 +120,9 @@ def delete_account(request):
     messages.success(request, "Your account has been deleted successfully.")
     return redirect('home')
 
+from math import radians, sin, cos, sqrt, atan2
+
+
 def calculate_distance(lat1, lon1, lat2, lon2):
     R = 6371  # Radius of Earth in km
     dlat = radians(lat2 - lat1)
@@ -129,52 +132,38 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     return R * c * 1000  # Convert to meters
 
 def home(request):
-    from math import radians, sin, cos, sqrt, atan2
-
-    def calculate_distance(lat1, lon1, lat2, lon2):
-        R = 6371  # Radius of the Earth in km
-        dlat = radians(lat2 - lat1)
-        dlon = radians(lon2 - lon1)
-        a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
-        c = 2 * atan2(sqrt(a), sqrt(1 - a))
-        return R * c * 1000  # Convert to meters
-
-    user_lat = float(request.GET.get('latitude', 0))  # Replace 0 with a default latitude
-    user_lon = float(request.GET.get('longitude', 0))  # Replace 0 with a default longitude
-
     reminders = EventReminder.objects.all()
     locations = Location.objects.all()
 
     combined_list = []
 
     for reminder in reminders:
-        if reminder.latitude is not None and reminder.longitude is not None:
-            distance = calculate_distance(user_lat, user_lon, reminder.latitude, reminder.longitude)
-            distance_str = f"{int(distance)} meters" if distance < 1000 else f"{distance / 1000:.2f} kilometers"
-            combined_list.append({
-                'type': 'reminder',
-                'description': reminder.description,
-                'latitude': reminder.latitude,
-                'longitude': reminder.longitude,
-                'date': reminder.date,
-                'start_time': reminder.start_time,
-                'distance': distance_str,
-            })
+        start_time = reminder.start_time.strftime("%I:%M %p") if reminder.start_time else ""
+        end_time = reminder.end_time.strftime("%I:%M %p") if reminder.end_time else None
+
+        combined_list.append({
+            'type': 'reminder',
+            'title': reminder.description, 
+            'start': f"{reminder.date.strftime('%B %d, %Y')} {start_time}",
+            'end': f"{reminder.date.strftime('%B %d, %Y')} {end_time}" if end_time else None,
+            'longitude': reminder.longitude if reminder.longitude is not None else "",
+            'latitude': reminder.latitude if reminder.latitude is not None else "",
+            'image': reminder.image.url if reminder.image else "",
+        })
 
     for location in locations:
-        if location.latitude is not None and location.longitude is not None:
-            distance = calculate_distance(user_lat, user_lon, location.latitude, location.longitude)
-            distance_str = f"{int(distance)} meters" if distance < 1000 else f"{distance / 1000:.2f} kilometers"
-            combined_list.append({
-                'type': 'location',
-                'name': location.name,
-                'description': location.description,
-                'latitude': location.latitude,
-                'longitude': location.longitude,
-                'weather': location.weather,
-                'distance': distance_str,
-            })
+        combined_list.append({
+            'type': 'location',
+            'name': location.name,
+            'description': location.description,
+            'longitude': location.longitude,
+            'latitude': location.latitude,
+            'weather': location.weather,  
+        })
 
-    combined_list.sort(key=lambda x: float(x['distance'].split()[0]))
+    combined_list_json = json.dumps(combined_list, cls=DjangoJSONEncoder)
 
-    return render(request, 'home.html', {'combined_list': combined_list})
+    return render(request, 'home.html', {
+        'combined_list': combined_list,
+        'combined_list_json': combined_list_json,
+    })

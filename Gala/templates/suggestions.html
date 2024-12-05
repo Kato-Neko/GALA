@@ -52,19 +52,31 @@
             {% for item in combined_list %}
             <div class="group relative bg-light bg-opacity-90 p-4 rounded-lg shadow-md">
                 {% if item.type == "reminder" %}
-                <h4 class="font-bold text-lg text-dark">{{ item.description }}</h4>
-                <p class="text-gray-700">{{ item.date }} at {{ item.start_time }}</p>
+                <h4 class="font-bold text-lg text-dark">{{ item.title }}</h4>
+                <p class="text-gray-700">Start: {{ item.start }}</p>
+                {% if item.end %}
+                <p class="text-gray-700">End: {{ item.end }}</p>
+                {% endif %}
+                {% if item.image %}
+                <img src="{{ item.image }}" alt="Reminder Image" class="w-full h-auto rounded-lg mt-2">
+                {% endif %}
+                <p class="text-gray-700">Longitude: {{ item.longitude }}</p>
+                <p class="text-gray-700">Latitude: {{ item.latitude }}</p>
                 {% elif item.type == "location" %}
                 <h4 class="font-bold text-lg text-dark">{{ item.name }}</h4>
                 <p class="text-gray-700">{{ item.description }}</p>
+                {% if item.weather %}
                 <p class="text-gray-700">Weather: {{ item.weather }}</p>
                 {% endif %}
-                <p class="text-dark mt-2">Distance: {{ item.distance }}</p>
+                <p class="text-gray-700">Longitude: {{ item.longitude }}</p>
+                <p class="text-gray-700">Latitude: {{ item.latitude }}</p>
+                {% endif %}
             </div>
             {% empty %}
             <p class="text-center text-gray-300">No nearby suggestions found.</p>
             {% endfor %}
         </div>
+
     </div>
 </body>
 
