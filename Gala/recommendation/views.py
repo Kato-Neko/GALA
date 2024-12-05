@@ -2,6 +2,32 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from .models import Location
 from .forms import LocationForm
+from django.views.generic import ListView
+
+class LocationHomeView(ListView):
+    model = Location
+    template_name = 'home.html'  # Update to your home page template
+    context_object_name = 'locations'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Add locations as JSON-like data to the context
+        locations = Location.objects.all()
+        locations_data = [
+            {
+                "id": location.id,
+                "name": location.name,
+                "description": location.description,
+                "longitude": location.longitude,
+                "latitude": location.latitude,
+                "weather": location.weather,
+            }
+            for location in locations
+        ]
+        
+        context['locations'] = locations_data  # This can be used in JavaScript
+        return context
 
 def admin_location_view(request):
     locations = Location.objects.all()
