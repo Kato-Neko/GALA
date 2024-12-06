@@ -12,7 +12,7 @@
                     🎄 Location Recommendations 🎁
                 </h1>
                 <h2 class="text-2xl font-semibold text-red-400 mt-2 drop-shadow-md">
-                    Within a 1000-meter radius
+                    Within a 5000-meter radius
                 </h2>
             </div>
 
@@ -40,6 +40,16 @@
                 {% for location in locations %}
                 <div class="location-card p-4 bg-white shadow-md rounded-lg hover:shadow-lg transition"
                     data-name="{{ location.name|lower }}" data-description="{{ location.description|lower }}">
+                    <!-- Image Section -->
+                    {% if location.image %}
+                    <img src="{{ location.image.url }}" alt="{{ location.name }}" class="w-full h-32 object-cover rounded-lg mb-4">
+                    {% else %}
+                    <div class="w-full h-32 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 mb-4">
+                        No Image
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Location Details -->
                     <h3 class="text-xl font-bold text-red-500 mb-2">
                         {{ location.name }}
                     </h3>
