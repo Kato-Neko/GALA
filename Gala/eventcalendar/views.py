@@ -1,6 +1,9 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import EventReminder
+from .utils import get_address_from_coordinates
+from django.views.generic import UpdateView
+from .models import EventReminder
 
 class ReminderListView(ListView):
     model = EventReminder
@@ -28,7 +31,6 @@ class ReminderListView(ListView):
         context['object_list'] = reminders
         return context
 
-
 class ReminderCreateView(CreateView):
     model = EventReminder
     template_name = 'reminder_create.html'
@@ -36,12 +38,11 @@ class ReminderCreateView(CreateView):
     success_url = reverse_lazy('reminder-list')
 
     def form_valid(self, form):
-        # Additional processing if required
+        # Automatically fetch the address before saving
+        if form.instance.latitude and form.instance.longitude:
+            api_key = "ge-ea5a9c6688e4ac48"  # Replace with your actual API key
+            form.instance.address = get_address_from_coordinates(form.instance.latitude, form.instance.longitude, api_key)
         return super().form_valid(form)
-
-
-from django.views.generic import UpdateView
-from .models import EventReminder
 
 class ReminderUpdateView(UpdateView):
     model = EventReminder
@@ -53,8 +54,12 @@ class ReminderUpdateView(UpdateView):
         # Handle existing image if no new one is uploaded
         if 'image' not in self.request.FILES:
             form.instance.image = self.get_object().image
+        
+        # Fetch a new address if the coordinates are updated
+        if form.instance.latitude and form.instance.longitude:
+            api_key = "ge-ea5a9c6688e4ac48"  # Replace with your actual API key
+            form.instance.address = get_address_from_coordinates(form.instance.latitude, form.instance.longitude, api_key)
         return super().form_valid(form)
-
 
 class ReminderDeleteView(DeleteView):
     model = EventReminder
@@ -77,8 +82,9 @@ class HomeView(ListView):
                 "start": f"{reminder.date}T{reminder.start_time}",
                 "end": f"{reminder.date}T{reminder.end_time}",
                 "image": reminder.image.url if reminder.image else "",
+                "address": reminder.address,  # Include the address
             }
             for reminder in reminders
         ]
-        context['events'] = events  # Passing events for JavaScript in home.html
+        context['events'] = events 
         return context

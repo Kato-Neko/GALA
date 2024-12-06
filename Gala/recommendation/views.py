@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from .models import Location
 from .forms import LocationForm
 from django.views.generic import ListView
+from .utils import get_address_from_coordinates
 
 class LocationHomeView(ListView):
     model = Location
@@ -38,7 +39,14 @@ def add_location(request):
     if request.method == 'POST':
         form = LocationForm(request.POST, request.FILES)
         if form.is_valid():
-            location = form.save()
+            location = form.save(commit=False)
+            
+            # Fetch address from coordinates
+            if location.latitude and location.longitude:
+                api_key = "ge-ea5a9c6688e4ac48"  # Replace with your actual API key
+                location.address = get_address_from_coordinates(location.latitude, location.longitude, api_key)
+            
+            location.save()
             return JsonResponse({
                 'status': 'success',
                 'location': {
@@ -49,6 +57,7 @@ def add_location(request):
                     'latitude': location.latitude,
                     'weather': location.weather,
                     'image_url': location.image.url if location.image else None,
+                    'address': location.address,  # Include address
                 }
             })
     return JsonResponse({'status': 'error', 'message': 'Invalid data'})
@@ -59,7 +68,14 @@ def edit_location(request, pk):
     if request.method == 'POST':
         form = LocationForm(request.POST, request.FILES, instance=location)  # Include request.FILES
         if form.is_valid():
-            location = form.save()
+            location = form.save(commit=False)
+
+            # Fetch a new address if coordinates are updated
+            if location.latitude and location.longitude:
+                api_key = "ge-ea5a9c6688e4ac48"  # Replace with your actual API key
+                location.address = get_address_from_coordinates(location.latitude, location.longitude, api_key)
+            
+            location.save()
             return JsonResponse({
                 'status': 'success',
                 'location': {
@@ -70,6 +86,7 @@ def edit_location(request, pk):
                     'latitude': location.latitude,
                     'weather': location.weather,
                     'image_url': location.image.url if location.image else None,
+                    'address': location.address,  # Include address
                 }
             })
     return JsonResponse({'status': 'error'}, status=400)
