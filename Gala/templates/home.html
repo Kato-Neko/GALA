@@ -60,26 +60,22 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        var map = L.map('map').setView([10.31, 123.8754], 13);
+        var map = L.map('map').setView([10.31, 123.8754], 10);
 
+        // Add tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        var customIcon = L.icon({
-            iconUrl: "{% static 'images/favicon.png' %}",
-            iconSize: [60, 60],
-            iconAnchor: [15, 50],
-            shadowUrl: "{% static 'images/marker-shadow.png' %}",
-            shadowSize: [60, 60],
-            shadowAnchor: [15, 50],
-            popupAnchor: [0, -50],
-        });
-
         var combinedList = JSON.parse('{{ combined_list_json|escapejs }}');
+        var allPins = JSON.parse('{{ all_pins_json|escapejs }}');
 
-        combinedList.forEach(item => {
+        // Create a feature group to hold all markers
+        var allMarkers = L.featureGroup();
+
+        // Add markers for reminders and locations
+        allPins.forEach(item => {
             const {
                 latitude,
                 longitude,
@@ -109,7 +105,7 @@
                 popupAnchor: [0, -50],
             });
 
-            const bgColor = type === 'reminder' ? 'rgba(0, 56, 109, 0.8)' : 'rgba(197, 48, 48, 0.8)'
+            const bgColor = type === 'reminder' ? 'rgba(0, 56, 109, 0.8)' : 'rgba(197, 48, 48, 0.8)';
             const labelColor = type === 'reminder' ? 'bg-blue-700' : 'bg-red-400';
 
             let popupContent = `
@@ -154,7 +150,7 @@
             }
 
             popupContent += `
-                <p><strong></strong> ${distance} away</p>
+                <p><strong>Distance:</strong> ${distance}</p>
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
                     <button style="background-color: white; color: black; padding: 5px 10px; border: none; border-radius: 5px; font-size: 0.9em; cursor: pointer;">
                         By car
@@ -166,11 +162,15 @@
             </div>
             `;
 
-            L.marker([latitude, longitude], { icon: customIcon })
-                .addTo(map)
+            const marker = L.marker([latitude, longitude], { icon: customIcon })
                 .bindPopup(popupContent, { className: 'custom-popup' });
 
+            // Add the marker to the feature group
+            marker.addTo(allMarkers);
         });
+
+        // Add all markers to the map
+        allMarkers.addTo(map);
 
         function getUserLocation() {
             if (navigator.geolocation) {
@@ -179,17 +179,21 @@
                         const userLatitude = position.coords.latitude;
                         const userLongitude = position.coords.longitude;
 
-                        map.setView([userLatitude, userLongitude], 13);
+                        // Set the zoom level and center the map around the user's location
+                        map.setView([userLatitude, userLongitude], 13); // Adjust the zoom level as needed
 
+                        // Add the 7km radius circle to the map
+                        const radiusInMeters = 7000;
                         const userLocationCircle = L.circle([userLatitude, userLongitude], {
                             fillColor: 'yellow',
                             fillOpacity: 0.4,
                             stroke: true,
                             color: 'yellow',
                             weight: 3,
-                            radius: 5000,
+                            radius: radiusInMeters,
                         }).addTo(map);
 
+                        // Add a small marker to indicate the exact user's location
                         const userExactLocationCircle = L.circleMarker([userLatitude, userLongitude], {
                             fillColor: 'white',
                             fillOpacity: 0.7,
@@ -199,6 +203,14 @@
                             radius: 10,
                         }).addTo(map);
 
+                        map.fitBounds(userLocationCircle.getBounds());
+
+                        map.once('moveend', () => {
+                            map.panBy([-150, -15]); // Adjust the map 200px to the right after move ends
+                        });
+
+
+                        // Save user location via an API
                         fetch('/api/user-location', {
                             method: 'POST',
                             headers: {
@@ -229,10 +241,13 @@
             }
         }
 
-
-        document.addEventListener('DOMContentLoaded', getUserLocation);
+        // Call getUserLocation and set bounds to the feature group after the user's location is fetched
+        document.addEventListener('DOMContentLoaded', () => {
+            getUserLocation();
+        });
 
     </script>
+
 </body>
 
 </html>

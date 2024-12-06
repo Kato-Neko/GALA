@@ -10,7 +10,8 @@ GALA - Account Management
 </head>
 
 {% block content %}
-<div class="h-screen flex items-center justify-center" style="background: rgba(3, 2, 84, 0.4);">
+<div class="h-screen flex items-center justify-center"
+    style="background: linear-gradient(to bottom, #287dec, #e5d3be);">
     <form id="update-account-form" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="grid grid-cols-6 gap-4">
@@ -20,10 +21,9 @@ GALA - Account Management
 
             <!-- First column: Avatar with fixed width -->
             <div class="flex justify-center items-center col-span-2">
-                <div class="p-2 border-4 border-dashed relative w-full h-full overflow-hidden"
-                    style="border-color: rgba(3, 2, 84, 0.4);">
+                <div class="p-2 border-4 border-dashed relative w-full h-full overflow-hidden">
                     <!-- Fixed width and height -->
-                    <div class="profile-picture mx-auto flex items-center justify-center relative w-full h-full">
+                    <div class="profile-picture mx-auto flex items-center justify-center relative w-[500px] h-[500px]">
                         {% if user.is_authenticated and user.profile.profile_picture %}
                         <img id="profile-picture-preview" src="{{ user.profile.profile_picture.url }}"
                             alt="Profile Picture" class="object-cover w-full h-full">
@@ -37,7 +37,7 @@ GALA - Account Management
             </div>
 
             <!-- Second column: Form content -->
-            <div class="w-full border-2 border-gray-500 rounded-lg p-6 col-span-2 flex justify-center items-center"
+            <div class="w-full border-2 rounded-lg p-6 col-span-2 flex justify-center items-center"
                 style="background: rgba(3, 2, 84, 0.4);">
                 <div class="w-full max-w-lg">
                     <!-- Email Address -->
