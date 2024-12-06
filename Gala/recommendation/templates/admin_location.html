@@ -5,7 +5,7 @@
 
     <!-- Add Location Form -->
     <div class="bg-white shadow-md rounded-lg mb-6 p-6">
-        <form id="locationForm" method="POST" class="space-y-4">
+        <form id="locationForm" method="POST" enctype="multipart/form-data" class="space-y-4">
             {% csrf_token %}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <input type="text" name="name"
@@ -22,7 +22,8 @@
                     placeholder="Latitude" required>
                 <input type="text" name="weather"
                     class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                    placeholder="Weather" required>
+                    placeholder="Weather" required> 
+                <input type="file" name="image"> <!-- Add this field -->
                 <button type="submit"
                     class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition duration-200">Add
                     Location</button>
@@ -30,50 +31,61 @@
         </form>
     </div>
 
-    <!-- Locations Table -->
-    <div class="bg-white shadow-md rounded-lg overflow-x-auto">
-        <table class="w-full border-collapse">
-            <thead>
-                <tr class="bg-gray-100">
-                    <th class="text-left p-4 border-b font-medium text-gray-600">Name</th>
-                    <th class="text-left p-4 border-b font-medium text-gray-600">Description</th>
-                    <th class="text-left p-4 border-b font-medium text-gray-600">Longitude</th>
-                    <th class="text-left p-4 border-b font-medium text-gray-600">Latitude</th>
-                    <th class="text-left p-4 border-b font-medium text-gray-600">Weather</th>
-                    <th class="text-center p-4 border-b font-medium text-gray-600">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="locationTableBody">
-                {% for location in locations %}
-                <tr data-id="{{ location.id }}" class="hover:bg-gray-50">
-                    <td class="p-4 border-b text-gray-700">{{ location.name }}</td>
-                    <td class="p-4 border-b text-gray-700">{{ location.description }}</td>
-                    <td class="p-4 border-b text-gray-700">{{ location.longitude }}</td>
-                    <td class="p-4 border-b text-gray-700">{{ location.latitude }}</td>
-                    <td class="p-4 border-b text-gray-700">{{ location.weather }}</td>
-                    <td class="p-4 border-b text-center">
-                        <button
-                            class="edit-btn bg-yellow-400 hover:bg-yellow-500 text-white py-1 px-3 rounded-lg font-semibold transition duration-200">Edit</button>
-                        <button
-                            class="delete-btn bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-lg font-semibold transition duration-200">Delete</button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<!-- Locations Table -->
+<div class="bg-white shadow-md rounded-lg overflow-x-auto">
+    <table class="w-full border-collapse">
+        <thead>
+            <tr class="bg-gray-100">
+                <th class="text-left p-4 border-b font-medium text-gray-600">Name</th>
+                <th class="text-left p-4 border-b font-medium text-gray-600">Description</th>
+                <th class="text-left p-4 border-b font-medium text-gray-600">Longitude</th>
+                <th class="text-left p-4 border-b font-medium text-gray-600">Latitude</th>
+                <th class="text-left p-4 border-b font-medium text-gray-600">Weather</th>
+                <th class="text-left p-4 border-b font-medium text-gray-600">Image</th> <!-- New column header -->
+                <th class="text-center p-4 border-b font-medium text-gray-600">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="locationTableBody">
+            {% for location in locations %}
+            <tr data-id="{{ location.id }}" class="hover:bg-gray-50">
+                <td class="p-4 border-b text-gray-700">{{ location.name }}</td>
+                <td class="p-4 border-b text-gray-700">{{ location.description }}</td>
+                <td class="p-4 border-b text-gray-700">{{ location.longitude }}</td>
+                <td class="p-4 border-b text-gray-700">{{ location.latitude }}</td>
+                <td class="p-4 border-b text-gray-700">{{ location.weather }}</td>
+                <td class="p-4 border-b text-gray-700"> <!-- Image column -->
+                    {% if location.image %}
+                    <img src="{{ location.image.url }}" alt="{{ location.name }}" class="w-20 h-20 object-cover rounded-lg">
+                    {% else %}
+                    No Image
+                    {% endif %}
+                </td>
+                <td class="p-4 border-b text-center">
+                    <button
+                        class="edit-btn bg-yellow-400 hover:bg-yellow-500 text-white py-1 px-3 rounded-lg font-semibold transition duration-200">Edit</button>
+                    <button
+                        class="delete-btn bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-lg font-semibold transition duration-200">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
+
 
 <!-- Edit Modal -->
 <div id="editModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden">
     <div class="bg-white rounded-lg shadow-lg w-11/12 md:w-1/2">
+        <!-- Modal Header -->
         <div class="border-b p-4 flex justify-between items-center">
             <h5 class="text-xl font-semibold">Edit Location</h5>
             <button class="text-gray-500 hover:text-gray-700"
                 onclick="document.getElementById('editModal').classList.add('hidden');">&times;</button>
         </div>
+        <!-- Modal Body -->
         <div class="p-6">
-            <form id="editForm" class="space-y-4">
+            <form id="editForm" class="space-y-4" enctype="multipart/form-data">
+                {% csrf_token %}
                 <input type="hidden" name="location_id">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -106,9 +118,21 @@
                             class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
                             required>
                     </div>
+                    <!-- Image Section -->
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Current Image</label>
+                        <img class="image-preview hidden w-32 h-32 mt-4 rounded-md border" src="" alt="Current Image">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Upload New Image</label>
+                        <input type="file" name="image"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                            accept="image/*">
+                    </div>
                 </div>
             </form>
         </div>
+        <!-- Modal Footer -->
         <div class="border-t p-4 flex justify-end">
             <button
                 class="btn-cancel bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg font-semibold mr-2 transition duration-200"
@@ -120,9 +144,10 @@
     </div>
 </div>
 
+
 {% block extra_js %}
 <script>
-    // Show Modal
+    // Function to Show Modal
     function showModal(modalId) {
         document.getElementById(modalId).classList.remove('hidden');
     }
@@ -130,10 +155,14 @@
     // Add Location
     $('#locationForm').on('submit', function (e) {
         e.preventDefault();
+        const formData = new FormData(this);
+
         $.ajax({
             url: '{% url "add_location" %}',
             method: 'POST',
-            data: $(this).serialize(),
+            data: formData,
+            contentType: false,
+            processData: false,
             success: function (response) {
                 if (response.status === 'success') {
                     const location = response.location;
@@ -144,6 +173,9 @@
                             <td class="p-4 border-b text-gray-700">${location.longitude}</td>
                             <td class="p-4 border-b text-gray-700">${location.latitude}</td>
                             <td class="p-4 border-b text-gray-700">${location.weather}</td>
+                            <td class="p-4 border-b text-gray-700">
+                                ${location.image_url ? `<img src="${location.image_url}" alt="${location.name}" class="w-20 h-20 object-cover rounded-lg">` : 'No Image'}
+                            </td>
                             <td class="p-4 border-b text-center">
                                 <button class="edit-btn bg-yellow-400 hover:bg-yellow-500 text-white py-1 px-3 rounded-lg font-semibold transition duration-200">Edit</button>
                                 <button class="delete-btn bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-lg font-semibold transition duration-200">Delete</button>
@@ -151,8 +183,14 @@
                         </tr>
                     `;
                     $('#locationTableBody').append(newRow);
-                    $('#locationForm')[0].reset();
+                    $('#locationForm')[0].reset(); // Reset the form
+                } else {
+                    alert('Error adding location: ' + (response.message || 'Unknown error.'));
                 }
+            },
+            error: function (xhr) {
+                console.error('Error:', xhr.responseText);
+                alert('Failed to add location. Please try again.');
             }
         });
     });
@@ -166,7 +204,9 @@
         const longitude = row.find('td:eq(2)').text();
         const latitude = row.find('td:eq(3)').text();
         const weather = row.find('td:eq(4)').text();
+        const imageSrc = row.find('td:eq(5) img').attr('src'); // Assuming the image is in the 6th column
 
+        // Populate the edit form with the current data
         $('#editForm [name="location_id"]').val(id);
         $('#editForm [name="name"]').val(name);
         $('#editForm [name="description"]').val(description);
@@ -174,15 +214,26 @@
         $('#editForm [name="latitude"]').val(latitude);
         $('#editForm [name="weather"]').val(weather);
 
+        if (imageSrc) {
+            $('#editForm .image-preview').attr('src', imageSrc).removeClass('hidden');
+        } else {
+            $('#editForm .image-preview').addClass('hidden');
+        }
+
         showModal('editModal');
     });
 
+    // Save Edited Location
     $('#saveEdit').on('click', function () {
         const id = $('#editForm [name="location_id"]').val();
+        const formData = new FormData($('#editForm')[0]);
+
         $.ajax({
-            url: `{% url 'edit_location' pk=0 %}`.replace('0', id), // Dynamic URL generation
+            url: `{% url 'edit_location' pk=0 %}`.replace('0', id), // Replace '0' with the actual ID
             method: 'POST',
-            data: $('#editForm').serialize() + '&csrfmiddlewaretoken=' + $('[name=csrfmiddlewaretoken]').val(),
+            data: formData,
+            processData: false, // Required for file upload
+            contentType: false, // Required for file upload
             success: function (response) {
                 if (response.status === 'success') {
                     const location = response.location;
@@ -192,8 +243,19 @@
                     row.find('td:eq(2)').text(location.longitude);
                     row.find('td:eq(3)').text(location.latitude);
                     row.find('td:eq(4)').text(location.weather);
+
+                    if (location.image_url) {
+                        row.find('td:eq(5) img').attr('src', location.image_url);
+                    }
+
                     document.getElementById('editModal').classList.add('hidden');
+                } else {
+                    alert('Error updating location: ' + (response.message || 'Unknown error.'));
                 }
+            },
+            error: function (xhr) {
+                console.error('Error:', xhr.responseText);
+                alert('Failed to update location. Please try again.');
             }
         });
     });
@@ -203,16 +265,23 @@
         if (confirm('Are you sure you want to delete this location?')) {
             const row = $(this).closest('tr');
             const id = row.data('id');
+
             $.ajax({
-                url: `{% url 'delete_location' pk=0 %}`.replace('0', id), // Dynamic URL generation
+                url: `{% url 'delete_location' pk=0 %}`.replace('0', id), // Replace '0' with the actual ID
                 method: 'POST',
                 data: {
-                    csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
+                    csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val() // Include CSRF token
                 },
                 success: function (response) {
                     if (response.status === 'success') {
-                        row.remove();
+                        row.remove(); // Remove the row from the table
+                    } else {
+                        alert('Error deleting location: ' + (response.message || 'Unknown error.'));
                     }
+                },
+                error: function (xhr) {
+                    console.error('Error:', xhr.responseText);
+                    alert('Failed to delete location. Please try again.');
                 }
             });
         }

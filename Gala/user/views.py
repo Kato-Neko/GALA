@@ -202,6 +202,7 @@ def home(request):
                 'longitude': location.longitude,
                 'latitude': location.latitude,
                 'address': location.address,
+                'image': location.image.url if location.image else "", 
                 'weather': location.weather,
                 'distance_value': distance,  # Add raw distance for sorting
                 'distance': f"{distance / 1000:.2f} km",  # Convert to km for display
