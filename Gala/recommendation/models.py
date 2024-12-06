@@ -6,6 +6,7 @@ class Location(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     weather = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='location_images/', blank=True, null=True)  # Add image field
 
     def __str__(self):
         return self.name

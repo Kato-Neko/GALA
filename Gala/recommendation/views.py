@@ -22,6 +22,7 @@ class LocationHomeView(ListView):
                 "longitude": location.longitude,
                 "latitude": location.latitude,
                 "weather": location.weather,
+                "image_url": location.image.url if location.image else None,
             }
             for location in locations
         ]
@@ -31,12 +32,11 @@ class LocationHomeView(ListView):
 
 def admin_location_view(request):
     locations = Location.objects.all()
-    form = LocationForm()
-    return render(request, 'admin_location.html', {'locations': locations, 'form': form})
+    return render(request, 'admin_location.html', {'locations': locations})
 
 def add_location(request):
     if request.method == 'POST':
-        form = LocationForm(request.POST)
+        form = LocationForm(request.POST, request.FILES)
         if form.is_valid():
             location = form.save()
             return JsonResponse({
@@ -48,14 +48,16 @@ def add_location(request):
                     'longitude': location.longitude,
                     'latitude': location.latitude,
                     'weather': location.weather,
+                    'image_url': location.image.url if location.image else None,
                 }
             })
-    return JsonResponse({'status': 'error'}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Invalid data'})
+
 
 def edit_location(request, pk):
     location = get_object_or_404(Location, pk=pk)
     if request.method == 'POST':
-        form = LocationForm(request.POST, instance=location)
+        form = LocationForm(request.POST, request.FILES, instance=location)  # Include request.FILES
         if form.is_valid():
             location = form.save()
             return JsonResponse({
@@ -67,6 +69,7 @@ def edit_location(request, pk):
                     'longitude': location.longitude,
                     'latitude': location.latitude,
                     'weather': location.weather,
+                    'image_url': location.image.url if location.image else None,
                 }
             })
     return JsonResponse({'status': 'error'}, status=400)
