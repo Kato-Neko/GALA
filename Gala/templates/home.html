@@ -27,6 +27,25 @@
             height: 100%;
             width: 100%;
         }
+
+        .custom-popup .leaflet-popup-content-wrapper {
+            width: 412px;
+            border: 5px solid rgb(255, 255, 255);
+            border-radius: 10px;
+            box-shadow: none !important;
+            background-color: transparent !important;
+        }
+
+        .custom-popup .leaflet-popup-content {
+            color: rgb(255, 255, 255);
+            margin: 0;
+            padding: 0;
+        }
+
+        .custom-popup .leaflet-popup-close-button {
+            cursor: pointer;
+            color: rgb(255, 255, 255) !important;
+        }
     </style>
 </head>
 
@@ -35,17 +54,14 @@
     <div id="map"></div>
 
     <!-- Include Modals -->
-    {% include 'suggestions.html' %}
+    {% include 'suggestions.html' with combined_list=combined_list %}
     {% include 'menu.html' %}
-    {% include 'marker.html' %}
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Initialize the map
-        var map = L.map('map').setView([10.3157, 123.6154], 10); // Cebu Island coordinates
+        var map = L.map('map').setView([10.31, 123.8754], 13);
 
-        // Add OpenStreetMap tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap contributors'
@@ -53,52 +69,169 @@
 
         var customIcon = L.icon({
             iconUrl: "{% static 'images/favicon.png' %}",
-            iconSize: [70, 70], // Adjust width and height
-            iconAnchor: [20, 60], // Point of the icon which will correspond to marker's location
-            shadowUrl: "{% static 'images/marker-shadow.png' %}", // Shadow image
-            shadowSize: [60, 60], // Size of the shadow
-            shadowAnchor: [15, 50], // Anchor point for the shadow (same as the icon)
-            popupAnchor: [0, -50], // Point where the popup will open relative to the icon anchor
+            iconSize: [60, 60],
+            iconAnchor: [15, 50],
+            shadowUrl: "{% static 'images/marker-shadow.png' %}",
+            shadowSize: [60, 60],
+            shadowAnchor: [15, 50],
+            popupAnchor: [0, -50],
         });
 
-        // Retrieve reminders data from the backend
-        var reminders = JSON.parse('{{ reminders_json|escapejs }}');
+        var combinedList = JSON.parse('{{ combined_list_json|escapejs }}');
 
-        // Add pins for each reminder
-        reminders.forEach(reminder => {
-            if (reminder.latitude && reminder.longitude) {
-                var marker = L.marker([reminder.latitude, reminder.longitude], { icon: customIcon }).addTo(map);
+        combinedList.forEach(item => {
+            const {
+                latitude,
+                longitude,
+                type,
+                title,
+                name,
+                description,
+                start,
+                end,
+                weather,
+                distance,
+                image,
+                address
+            } = item;
 
-                // Add click event to marker
-                marker.on('click', function () {
-                    // Populate the modal dynamically
-                    document.getElementById('modalContent').innerHTML = `
-                        <h2 class="text-xl font-bold mb-4">Reminder Details</h2>
-                        <p><strong>Description:</strong> ${reminder.description}</p>
-                        <p><strong>Latitude:</strong> ${reminder.latitude}</p>
-                        <p><strong>Longitude:</strong> ${reminder.longitude}</p>
-                    `;
+            const iconUrl = type === 'reminder'
+                ? "{% static 'images/favicon.png' %}"
+                : "{% static 'images/favicon_.png' %}";
 
-                    // Get the map's container point of the marker's position
-                    var point = map.latLngToContainerPoint(marker.getLatLng());
+            const customIcon = L.icon({
+                iconUrl: iconUrl,
+                iconSize: [60, 60],
+                iconAnchor: [15, 50],
+                shadowUrl: "{% static 'images/marker-shadow.png' %}",
+                shadowSize: [60, 60],
+                shadowAnchor: [15, 50],
+                popupAnchor: [0, -50],
+            });
 
-                    // Set modal position relative to the marker's position
-                    var modal = document.getElementById('popupModal');
-                    modal.style.left = `${point.x + 10}px`; // Positioning 10px to the right of the marker
-                    modal.style.top = `${point.y - 40}px`; // Positioning 40px above the marker
+            const bgColor = type === 'reminder' ? 'rgba(0, 56, 109, 0.8)' : 'rgba(197, 48, 48, 0.8)'
+            const labelColor = type === 'reminder' ? 'bg-blue-700' : 'bg-red-400';
 
-                    // Show the modal
-                    modal.classList.remove('hidden');
-                });
+            let popupContent = `
+                <div style="
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: start;
+                    padding: 30px; 
+                    height: 500px;  
+                    width: 400px; 
+                    border-radius: 10px; 
+                    background-color: ${bgColor}; 
+                    color: white; 
+                    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);">
+                    ${image ? `
+                        <img src="${image}" alt="Image" 
+                            style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 10px;" />
+                    ` : ''}                    
+                    <h3 style="margin: 0; font-size: 1.5em; font-weight: bold; text-align: center;">
+                        ${type === 'reminder' ? title : name}
+                    </h3>
+                    <p style="margin: 5px 0; font-size: 1em; text-align: center;">${address || 'Address not available'}</p>
+            `;
+
+            if (type === 'reminder') {
+                popupContent += `
+                    <span class="inline-block px-3 py-1 text-xs font-medium text-white rounded ${labelColor}">
+                        Reminder
+                    </span>
+                    <p><strong>Start:</strong> ${start}</p>
+                    ${end ? `<p><strong>End:</strong> ${end}</p>` : ''}
+                `;
+            } else if (type === 'location') {
+                popupContent += `
+                    <span class="inline-block px-3 py-1 text-xs font-medium text-white rounded ${labelColor}">
+                        Location
+                    </span>
+                    <p><strong>Description:</strong> ${description}</p>
+                    ${weather ? `<p><strong>Weather:</strong> ${weather}</p>` : ''}
+                `;
             }
+
+            popupContent += `
+                <p><strong></strong> ${distance} away</p>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button style="background-color: white; color: black; padding: 5px 10px; border: none; border-radius: 5px; font-size: 0.9em; cursor: pointer;">
+                        By car
+                    </button>
+                    <button style="background-color: white; color: black; padding: 5px 10px; border: none; border-radius: 5px; font-size: 0.9em; cursor: pointer;">
+                        By foot
+                    </button>
+                </div>
+            </div>
+            `;
+
+            L.marker([latitude, longitude], { icon: customIcon })
+                .addTo(map)
+                .bindPopup(popupContent, { className: 'custom-popup' });
+
         });
 
-        function closeModal(event) {
-            // Close the modal only if the click was outside the modal content
-            if (event.target === document.getElementById('popupModal')) {
-                document.getElementById('popupModal').classList.add('hidden');
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const userLatitude = position.coords.latitude;
+                        const userLongitude = position.coords.longitude;
+
+                        map.setView([userLatitude, userLongitude], 13);
+
+                        const userLocationCircle = L.circle([userLatitude, userLongitude], {
+                            fillColor: 'yellow',
+                            fillOpacity: 0.4,
+                            stroke: true,
+                            color: 'yellow',
+                            weight: 3,
+                            radius: 5000,
+                        }).addTo(map);
+
+                        const userExactLocationCircle = L.circleMarker([userLatitude, userLongitude], {
+                            fillColor: 'white',
+                            fillOpacity: 0.7,
+                            stroke: true,
+                            color: 'black',
+                            weight: 1,
+                            radius: 10,
+                        }).addTo(map);
+
+                        fetch('/api/user-location', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}',
+                            },
+                            body: JSON.stringify({
+                                latitude: userLatitude,
+                                longitude: userLongitude,
+                            }),
+                        })
+                            .then((response) => response.json())
+                            .then((data) => {
+                                if (data.success) {
+                                    console.log('User location saved successfully.');
+                                } else {
+                                    console.error('Failed to save user location:', data.error);
+                                }
+                            })
+                            .catch((error) => console.error('Error:', error));
+                    },
+                    (error) => {
+                        console.error('Error getting location:', error);
+                    }
+                );
+            } else {
+                console.error('Geolocation is not supported by this browser.');
             }
         }
+
+
+        document.addEventListener('DOMContentLoaded', getUserLocation);
+
     </script>
 </body>
 

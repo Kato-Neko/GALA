@@ -3,14 +3,18 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django import forms
 from django.contrib import messages
-from user.models import Profile
-from django.http import JsonResponse
+
 from django.core.serializers.json import DjangoJSONEncoder
-from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from user.models import Profile
+from django import forms
 
 from eventcalendar.models import EventReminder
+from recommendation.models import Location
+from math import radians, sin, cos, sqrt, atan2
+
 import json
 
 class CustomUserCreationForm(UserCreationForm):
@@ -117,18 +121,98 @@ def delete_account(request):
     messages.success(request, "Your account has been deleted successfully.")
     return redirect('home')
 
+@csrf_exempt
+def save_user_location(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            latitude = data.get('latitude')
+            longitude = data.get('longitude')
+
+            if latitude is not None and longitude is not None:
+                # Save or use the location data (e.g., save to session or database)
+                request.session['user_latitude'] = latitude
+                request.session['user_longitude'] = longitude
+                return JsonResponse({'success': True})
+            else:
+                return JsonResponse({'success': False, 'error': 'Invalid location data.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+def calculate_distance(lat1, lon1, lat2, lon2):
+    R = 6371  # Radius of Earth in km
+    dlat = radians(lat2 - lat1)
+    dlon = radians(lon2 - lon1)
+    a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    return R * c * 1000  # Convert to meters
+
 def home(request):
-    # Fetch all EventReminder objects
     reminders = EventReminder.objects.all()
-    reminders_data = [
-        {
-            "description": reminder.description,
-            "latitude": reminder.latitude,
-            "longitude": reminder.longitude,
-        }
-        for reminder in reminders
-    ]
+    locations = Location.objects.all()
+
+    # Retrieve user's current location from the session
+    user_latitude = request.session.get('user_latitude')
+    user_longitude = request.session.get('user_longitude')
+
+    combined_list = []
+
+    # Add reminders to the combined list
+    for reminder in reminders:
+        start_time = reminder.start_time.strftime("%I:%M %p") if reminder.start_time else ""
+        end_time = reminder.end_time.strftime("%I:%M %p") if reminder.end_time else None
+        distance = None
+
+        if user_latitude and user_longitude and reminder.latitude and reminder.longitude:
+            distance = calculate_distance(
+                float(user_latitude), float(user_longitude),
+                float(reminder.latitude), float(reminder.longitude)
+            )
+
+        if distance is not None and distance <= 5000:  # 5 km in meters
+            combined_list.append({
+                'type': 'reminder',
+                'title': reminder.description,
+                'start': f"{reminder.date.strftime('%B %d, %Y')} {start_time}",
+                'end': f"{reminder.date.strftime('%B %d, %Y')} {end_time}" if end_time else None,
+                'longitude': reminder.longitude if reminder.longitude is not None else "",
+                'latitude': reminder.latitude if reminder.latitude is not None else "",
+                'address': reminder.address,
+                'image': reminder.image.url if reminder.image else "",  # Include image URL
+                'distance_value': distance,  # Add raw distance for sorting
+                'distance': f"{distance / 1000:.2f} km",  # Convert to km for display
+            })
+
+    # Add locations to the combined list
+    for location in locations:
+        distance = None
+        if user_latitude and user_longitude and location.latitude and location.longitude:
+            distance = calculate_distance(
+                float(user_latitude), float(user_longitude),
+                float(location.latitude), float(location.longitude)
+            )
+
+        if distance is not None and distance <= 5000:  # 5 km in meters
+            combined_list.append({
+                'type': 'location',
+                'name': location.name,
+                'description': location.description,
+                'longitude': location.longitude,
+                'latitude': location.latitude,
+                'address': location.address,
+                'weather': location.weather,
+                'distance_value': distance,  # Add raw distance for sorting
+                'distance': f"{distance / 1000:.2f} km",  # Convert to km for display
+            })
+
+    # Sort the combined list by distance
+    combined_list.sort(key=lambda x: x['distance_value'])
+
+    combined_list_json = json.dumps(combined_list, cls=DjangoJSONEncoder)
+
     return render(request, 'home.html', {
-        'reminders': reminders,
-        'reminders_json': json.dumps(reminders_data, cls=DjangoJSONEncoder)
+        'combined_list': combined_list,
+        'combined_list_json': combined_list_json,
     })

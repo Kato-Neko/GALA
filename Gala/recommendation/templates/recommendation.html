@@ -3,52 +3,127 @@
 
 {% block content %}
 
-<body class="min-h-screen bg-gradient-to-b from-blue-200 to-white">
-    <div class="container mx-auto py-10 ">
-        <!-- Header Section -->
-        <div class="text-center mb-8 pt-20 pb-20">
-            <h1 class="text-4xl font-bold text-red-600 drop-shadow-md">
-                🎄 Location Recommendations 🎁
-            </h1>
-            <h2 class="text-2xl font-semibold text-red-600 drop-shadow-md">
-                Within a 1000-meter radius
-            </h2>
-        </div>
+<body class="imnida" style="background: linear-gradient(to bottom, #e0f7fa, #ffffff); min-height: 100vh;">
+    <div class="main-content relative py-10 px-4" style="padding-top: 120px;">
+        <div class="container mx-auto">
+            <!-- Header Section -->
+            <div class="text-center mb-6">
+                <h1 class="text-4xl font-extrabold text-red-500 tracking-wide drop-shadow-md">
+                    🎄 Location Recommendations 🎁
+                </h1>
+                <h2 class="text-2xl font-semibold text-red-400 mt-2 drop-shadow-md">
+                    Within a 1000-meter radius
+                </h2>
+            </div>
 
-        <!-- Search Bar Section -->
-        <div class="flex justify-center mb-8">
-            <form method="GET" class="w-full max-w-md">
-                <div class="flex shadow-lg">
-                    <input type="text" name="search"
-                        class="flex-grow p-3 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Search for locations..." value="{{ query }}">
-                    <button type="submit"
-                        class="px-6 py-3 bg-primary text-white font-bold rounded-r-lg hover:bg-yellow-500 focus:ring-2 focus:ring-primary">
-                        Search
+            <!-- Current Location Input -->
+            <div class="flex justify-center mb-6">
+                <div class="flex items-center w-full max-w-2xl bg-white rounded-full shadow-md overflow-hidden">
+                    <input type="text" id="current-location"
+                        placeholder="Enter your current location (Latitude, Longitude)"
+                        class="flex-grow p-4 text-gray-700 focus:outline-none" />
+                    <button id="locate-me"
+                        class="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 transition">
+                        Use My Location
                     </button>
                 </div>
-            </form>
-        </div>
+            </div>
 
-        <!-- Locations Grid Section -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for location in locations %}
-            <div class="bg-white rounded-lg shadow-md p-6 text-gray-700">
-                <h5 class="text-xl font-bold text-red-600">{{ location.name }}</h5>
-                <p class="italic">{{ location.description }}</p>
-                <ul class="text-sm mt-4">
-                    <li><strong>Distance:</strong> {{ location.distance }}</li>
-                    <li><strong>Weather:</strong> {{ location.weather }}</li>
-                </ul>
+            <!-- Search Bar -->
+            <div class="flex justify-center mb-8">
+                <input type="text" id="location-search" placeholder="Search for locations..."
+                    class="w-full max-w-2xl p-4 text-gray-700 rounded-full shadow-md focus:outline-none focus:ring focus:ring-red-300" />
             </div>
-            {% empty %}
-            <div class="col-span-full text-center">
-                <p class="text-lg font-semibold text-white bg-red-500 py-3 px-6 rounded-lg inline-block">
-                    🎅 No locations found matching your search. Try again! 🤶
-                </p>
+
+            <!-- Locations Grid -->
+            <div id="locations-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {% for location in locations %}
+                <div class="location-card p-4 bg-white shadow-md rounded-lg hover:shadow-lg transition"
+                    data-name="{{ location.name|lower }}" data-description="{{ location.description|lower }}">
+                    <h3 class="text-xl font-bold text-red-500 mb-2">
+                        {{ location.name }}
+                    </h3>
+                    <p class="text-gray-600 italic mb-4">{{ location.description }}</p>
+                    <ul class="text-sm text-gray-700 space-y-1">
+                        <li><strong>Longitude:</strong> {{ location.longitude }}</li>
+                        <li><strong>Latitude:</strong> {{ location.latitude }}</li>
+                        <li><strong>Weather:</strong> {{ location.weather }}</li>
+                    </ul>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center">
+                    <p class="text-red-500 text-lg font-semibold">
+                        🎅 No locations found matching your search. Try again! 🤶
+                    </p>
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
     </div>
+
+    <script>
+        // Dynamic Search Functionality
+        document.getElementById('location-search').addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+            const locationCards = document.querySelectorAll('.location-card');
+
+            locationCards.forEach(card => {
+                const name = card.dataset.name;
+                const description = card.dataset.description;
+
+                if (searchTerm === '' || name.includes(searchTerm) || description.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Geolocation Button
+        document.getElementById('locate-me').addEventListener('click', function () {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    document.getElementById('current-location').value = `${latitude}, ${longitude}`;
+
+                    // Filter locations within a 1000-meter radius
+                    filterLocationsByProximity(latitude, longitude);
+                }, function (error) {
+                    alert('Error getting location: ' + error.message);
+                });
+            } else {
+                alert('Geolocation is not supported by your browser');
+            }
+        });
+
+        // Function to filter locations by proximity
+        function filterLocationsByProximity(currentLat, currentLon) {
+            const locationCards = document.querySelectorAll('.location-card');
+
+            locationCards.forEach(card => {
+                const lat = parseFloat(card.querySelector('li:nth-child(2)').textContent.split(': ')[1]);
+                const lon = parseFloat(card.querySelector('li:nth-child(1)').textContent.split(': ')[1]);
+
+                // Haversine formula to calculate distance
+                const R = 6371; // Radius of the Earth in kilometers
+                const dLat = (lat - currentLat) * Math.PI / 180;
+                const dLon = (lon - currentLon) * Math.PI / 180;
+                const a =
+                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(currentLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                const distance = R * c * 1000; // Convert to meters
+
+                // Show only locations within 1000 meters
+                if (distance <= 1000) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
 </body>
 {% endblock %}

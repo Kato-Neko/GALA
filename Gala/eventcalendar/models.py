@@ -8,6 +8,7 @@ class EventReminder(models.Model):
     date = models.DateField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
+    address = models.CharField(max_length=500, blank=True, null=True) 
     image = models.ImageField(upload_to='reminder_images/', null=True, blank=True)  # Add this field
 
     def __str__(self):
