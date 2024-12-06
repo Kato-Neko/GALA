@@ -26,6 +26,25 @@
                 },
             },
         };
+
+        function toggleSuggestionItem(item) {
+            const isActive = item.getAttribute("data-active") === "true";
+
+            document.querySelectorAll('.suggestion-item').forEach((el) => {
+                el.classList.remove("active");
+                el.setAttribute("data-active", "false");
+                el.querySelector(".suggestion-item-extra").classList.add("hidden");
+            });
+
+            if (!isActive) {
+                item.classList.add("active");
+                item.setAttribute("data-active", "true");
+                const extraContent = item.querySelector(".suggestion-item-extra");
+                if (extraContent) {
+                    extraContent.classList.remove("hidden");
+                }
+            }
+        }
     </script>
 
     <link rel="stylesheet" href="{% static 'css/suggestions.css' %}">
@@ -42,26 +61,28 @@
     data-user-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
 
     <div class="center-rectangle bg-dark bg-opacity-90 shadow-xl p-10 rounded-2xl max-w-xl w-full">
+        <div class="center-rectangle-background"></div>
         <h2 class="outfit sticky top-0 text-2xl font-regular text-primary text-center mb-6">
-            UPCOMING <span class="lobster-two-bold text-4xl font-bold text-white"> GALA </span> EVENTS NEAR YOU
+            <span class="lobster-two-bold text-4xl font-bold text-white"> GALA </span> EVENTS HAPPENING NEAR YOU
         </h2>
 
         <div class="mt-4 space-y-6">
             {% for item in combined_list %}
-            <div
-                class="group relative bg-opacity-90 p-4 rounded-lg shadow-md 
-                {% if item.type == 'reminder' %} bg-primary text-white {% elif item.type == 'location' %} bg-dark text-light {% endif %}">
+            <div class="group suggestion-item relative p-4 rounded-lg shadow-md 
+                {% if item.type == 'reminder' %} bg-primary text-white {% elif item.type == 'location' %} bg-dark text-light {% endif %}"
+                data-active="false" onclick="toggleSuggestionItem(this)">
+                <h4 class="font-bold text-lg">
+                    {% if item.type == "reminder" %}
+                    {{ item.title }}
+                    {% else %}
+                    {{ item.name }}
+                    {% endif %}
+                </h4>
 
                 {% if item.type == "reminder" %}
-                <h4 class="font-bold text-lg">{{ item.title }}</h4>
-                <p>Start: {{ item.start }}</p>
-                {% if item.end %}
-                <p>End: {{ item.end }}</p>
-                {% endif %}
-                <p class="font-semibold">Distance: {{ item.distance }}</p>
-
+                <p class="font-semibold text-sm">{{ item.distance }} away</p>
+                <p class="font-semibold text-sm">{{ item.time_remaining }} to go</p>
                 {% elif item.type == "location" %}
-                <h4 class="font-bold text-lg">{{ item.name }}</h4>
                 <p>{{ item.description }}</p>
                 {% if item.weather %}
                 <p>Weather: {{ item.weather }}</p>
@@ -69,13 +90,30 @@
                 <p class="font-semibold">Distance: {{ item.distance }}</p>
                 {% endif %}
 
+                <div class="suggestion-item-extra hidden">
+                    <p class="suggestion-item-address">{{ item.address }}</p>
+                    <div class="suggestion-item-buttons">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM7 11h10v2H7z">
+                            </path>
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path
+                                d="M5 16v2h14v-2H5zm7-12C6.48 4 2 8.48 2 14s4.48 10 10 10 10-4.48 10-10S17.52 4 12 4zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
             </div>
+
             {% empty %}
             <p class="text-center text-gray-300">No nearby suggestions found.</p>
             {% endfor %}
         </div>
-
     </div>
+
+
 </body>
 
 </html>

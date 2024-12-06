@@ -13,6 +13,7 @@ from django import forms
 
 from eventcalendar.models import EventReminder
 from recommendation.models import Location
+from datetime import datetime, timedelta
 from math import radians, sin, cos, sqrt, atan2
 
 import json
@@ -157,9 +158,11 @@ def home(request):
     user_latitude = request.session.get('user_latitude')
     user_longitude = request.session.get('user_longitude')
 
-    combined_list = []
+    now = datetime.now()
+    combined_list = []  # For reminders/locations within 5km
+    all_pins = []       # For all reminders/locations (no distance restriction)
 
-    # Add reminders to the combined list
+    # Process reminders
     for reminder in reminders:
         start_time = reminder.start_time.strftime("%I:%M %p") if reminder.start_time else ""
         end_time = reminder.end_time.strftime("%I:%M %p") if reminder.end_time else None
@@ -170,50 +173,99 @@ def home(request):
                 float(user_latitude), float(user_longitude),
                 float(reminder.latitude), float(reminder.longitude)
             )
+        
+        # Add to all_pins (for map display)
+        all_pins.append({
+            'type': 'reminder',
+            'title': reminder.description,
+            'start': f"{reminder.date.strftime('%B %d, %Y')} {start_time}",
+            'end': f"{reminder.date.strftime('%B %d, %Y')} {end_time}" if end_time else None,
+            'latitude': reminder.latitude,
+            'longitude': reminder.longitude,
+            'address': reminder.address,
+            'image': reminder.image.url if reminder.image else "",
+            'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
+        })
 
-        if distance is not None and distance <= 5000:  # 5 km in meters
-            combined_list.append({
-                'type': 'reminder',
-                'title': reminder.description,
-                'start': f"{reminder.date.strftime('%B %d, %Y')} {start_time}",
-                'end': f"{reminder.date.strftime('%B %d, %Y')} {end_time}" if end_time else None,
-                'longitude': reminder.longitude if reminder.longitude is not None else "",
-                'latitude': reminder.latitude if reminder.latitude is not None else "",
-                'address': reminder.address,
-                'image': reminder.image.url if reminder.image else "",  # Include image URL
-                'distance_value': distance,  # Add raw distance for sorting
-                'distance': f"{distance / 1000:.2f} km",  # Convert to km for display
-            })
+        # Include only reminders within 5km in combined_list
+        if distance and distance <= 5000:
+            reminder_datetime = datetime.combine(reminder.date, reminder.start_time)
+            time_remaining = reminder_datetime - now
 
-    # Add locations to the combined list
+            if time_remaining.total_seconds() > 0:  # Only include upcoming reminders
+                days = time_remaining.days
+                hours, remainder = divmod(time_remaining.seconds, 3600)
+                minutes, _ = divmod(remainder, 60)
+
+                time_display = []
+                if days > 0:
+                    time_display.append(f"{days} day{'s' if days > 1 else ''}")
+                if hours > 0:
+                    time_display.append(f"{hours} hour{'s' if hours > 1 else ''}")
+                if minutes > 0:
+                    time_display.append(f"{minutes} minute{'s' if minutes > 1 else ''}")
+
+                formatted_time_remaining = ", ".join(time_display)
+
+                combined_list.append({
+                    'type': 'reminder',
+                    'title': reminder.description,
+                    'start': f"{reminder.date.strftime('%B %d, %Y')} {start_time}",
+                    'end': f"{reminder.date.strftime('%B %d, %Y')} {end_time}" if end_time else None,
+                    'latitude': reminder.latitude,
+                    'longitude': reminder.longitude,
+                    'address': reminder.address,
+                    'image': reminder.image.url if reminder.image else "",
+                    'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
+                    'time_remaining': formatted_time_remaining,
+                })
+
+    # Sort reminders by time first, then by distance
+    combined_list.sort(key=lambda x: (x['time_remaining'], x['distance']))
+
+    # Process locations
     for location in locations:
-        distance = None
-        if user_latitude and user_longitude and location.latitude and location.longitude:
-            distance = calculate_distance(
-                float(user_latitude), float(user_longitude),
-                float(location.latitude), float(location.longitude)
-            )
+        if location.latitude is not None and location.longitude is not None:
+            distance = None
+            if user_latitude and user_longitude:
+                distance = calculate_distance(
+                    float(user_latitude), float(user_longitude),
+                    float(location.latitude), float(location.longitude)
+                )
 
-        if distance is not None and distance <= 5000:  # 5 km in meters
-            combined_list.append({
+            # Add to all_pins (for map display)
+            all_pins.append({
                 'type': 'location',
                 'name': location.name,
                 'description': location.description,
-                'longitude': location.longitude,
                 'latitude': location.latitude,
+                'longitude': location.longitude,
                 'address': location.address,
-                'image': location.image.url if location.image else "", 
+                'image': location.image.url if location.image else "",
+                'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
                 'weather': location.weather,
-                'distance_value': distance,  # Add raw distance for sorting
-                'distance': f"{distance / 1000:.2f} km",  # Convert to km for display
             })
 
-    # Sort the combined list by distance
-    combined_list.sort(key=lambda x: x['distance_value'])
+            # Include only locations within 5km in combined_list
+            if distance and distance <= 5000:
+                combined_list.append({
+                    'type': 'location',
+                    'name': location.name,
+                    'description': location.description,
+                    'latitude': location.latitude,
+                    'longitude': location.longitude,
+                    'address': location.address,
+                    'image': location.image.url if location.image else "",
+                    'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
+                    'weather': location.weather,
+                })
 
+    # Serialize the combined lists for the template
     combined_list_json = json.dumps(combined_list, cls=DjangoJSONEncoder)
+    all_pins_json = json.dumps(all_pins, cls=DjangoJSONEncoder)
 
     return render(request, 'home.html', {
         'combined_list': combined_list,
         'combined_list_json': combined_list_json,
+        'all_pins_json': all_pins_json,
     })
