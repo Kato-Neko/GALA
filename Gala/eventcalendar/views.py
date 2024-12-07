@@ -139,6 +139,8 @@ class ReminderListView(ListView):
             calendar_events.append({
                 "id": reminder.event_reminder_id,
                 "title": reminder.description,
+                "longitude": reminder.longitude,
+                "latitude": reminder.latitude,
                 "start": f"{reminder.date}T{reminder.start_time}",
                 "end": f"{reminder.date}T{reminder.end_time}" if reminder.end_time else None,
                 "color": (
