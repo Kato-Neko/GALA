@@ -54,7 +54,7 @@
     <div id="map"></div>
 
     <!-- Include Modals -->
-    {% include 'suggestions.html' with combined_list=combined_list %}
+    {% include 'suggestions.html' %}
     {% include 'menu.html' %}
 
     <!-- Leaflet JS -->
@@ -68,7 +68,6 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        var combinedList = JSON.parse('{{ combined_list_json|escapejs }}');
         var allPins = JSON.parse('{{ all_pins_json|escapejs }}');
 
         // Create a feature group to hold all markers
@@ -88,12 +87,23 @@
                 weather,
                 distance,
                 image,
-                address
+                address,
+                is_happening
             } = item;
 
+            // Ensure distance is numeric (convert from string if necessary)
+            let numericDistance = parseFloat(distance);
+            if (distance.includes("km")) {
+                numericDistance *= 1000; // Convert km to meters
+            }
+
+            // Determine if the marker is within the 5km radius
+            const isWithin5km = numericDistance <= 5000; // 5000 meters = 5 km
+
+            // Determine the icon URL based on the event type and status
             const iconUrl = type === 'reminder'
-                ? "{% static 'images/favicon.png' %}"
-                : "{% static 'images/favicon_.png' %}";
+                ? (is_happening ? "{% static 'images/favicon_green.png' %}" : "{% static 'images/favicon.png' %}")
+                : "{% static 'images/favicon_red.png' %}";
 
             const customIcon = L.icon({
                 iconUrl: iconUrl,
@@ -109,61 +119,55 @@
             const labelColor = type === 'reminder' ? 'bg-blue-700' : 'bg-red-400';
 
             let popupContent = `
-                <div style="
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: start;
-                    padding: 30px; 
-                    height: 500px;  
-                    width: 400px; 
-                    border-radius: 10px; 
-                    background-color: ${bgColor}; 
-                    color: white; 
-                    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);">
-                    ${image ? `
-                        <img src="${image}" alt="Image" 
-                            style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 10px;" />
-                    ` : ''}                    
-                    <h3 style="margin: 0; font-size: 1.5em; font-weight: bold; text-align: center;">
-                        ${type === 'reminder' ? title : name}
-                    </h3>
-                    <p style="margin: 5px 0; font-size: 1em; text-align: center;">${address || 'Address not available'}</p>
-            `;
+        <div style="
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: start;
+            padding: 30px; 
+            height: auto !important;  
+            width: 400px; 
+            border-radius: 10px; 
+            background-color: ${bgColor}; 
+            color: white; 
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);">
+            ${image ? `
+                <img src="${image}" alt="Image" 
+                    style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 10px;" />
+            ` : ''}                    
+            <h3 style="margin: 0; font-size: 1.5em; font-weight: bold; text-align: center;">
+                ${type === 'reminder' ? title : name}
+            </h3>
+            <p style="margin: 5px 0; font-size: 1em; text-align: center;">${address || 'Address not available'}</p>
+    `;
 
             if (type === 'reminder') {
                 popupContent += `
-                    <span class="inline-block px-3 py-1 text-xs font-medium text-white rounded ${labelColor}">
-                        Reminder
-                    </span>
-                    <p><strong>Start:</strong> ${start}</p>
-                    ${end ? `<p><strong>End:</strong> ${end}</p>` : ''}
-                `;
+            <span class="inline-block px-3 py-1 text-xs font-medium text-white rounded ${labelColor}">
+                Reminder
+            </span>
+            <p><strong>Start:</strong> ${start}</p>
+            ${end ? `<p><strong>End:</strong> ${end}</p>` : ''}
+        `;
             } else if (type === 'location') {
                 popupContent += `
-                    <span class="inline-block px-3 py-1 text-xs font-medium text-white rounded ${labelColor}">
-                        Location
-                    </span>
-                    <p><strong>Description:</strong> ${description}</p>
-                    ${weather ? `<p><strong>Weather:</strong> ${weather}</p>` : ''}
-                `;
+            <span class="inline-block px-3 py-1 text-xs font-medium text-white rounded ${labelColor}">
+                Location
+            </span>
+            <p><strong>Description:</strong> ${description}</p>
+            ${weather ? `<p><strong>Weather:</strong> ${weather}</p>` : ''}
+        `;
             }
 
             popupContent += `
-                <p><strong>Distance:</strong> ${distance}</p>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button style="background-color: white; color: black; padding: 5px 10px; border: none; border-radius: 5px; font-size: 0.9em; cursor: pointer;">
-                        By car
-                    </button>
-                    <button style="background-color: white; color: black; padding: 5px 10px; border: none; border-radius: 5px; font-size: 0.9em; cursor: pointer;">
-                        By foot
-                    </button>
-                </div>
-            </div>
-            `;
+        <p><strong>Distance:</strong> ${distance}</p>
+    </div>
+    `;
 
-            const marker = L.marker([latitude, longitude], { icon: customIcon })
-                .bindPopup(popupContent, { className: 'custom-popup' });
+            const marker = L.marker([latitude, longitude], {
+                icon: customIcon,
+                opacity: isWithin5km ? 1 : 0.5 // Adjust opacity for markers outside 5km radius
+            }).bindPopup(popupContent, { className: 'custom-popup' });
 
             // Add the marker to the feature group
             marker.addTo(allMarkers);
@@ -171,6 +175,7 @@
 
         // Add all markers to the map
         allMarkers.addTo(map);
+
 
         function getUserLocation() {
             if (navigator.geolocation) {
@@ -206,11 +211,9 @@
                         map.fitBounds(userLocationCircle.getBounds());
 
                         map.once('moveend', () => {
-                            map.panBy([-150, -15]); // Adjust the map 200px to the right after move ends
+                            map.panBy([-150, -15]);
                         });
 
-
-                        // Save user location via an API
                         fetch('/api/user-location', {
                             method: 'POST',
                             headers: {

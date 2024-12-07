@@ -19,6 +19,8 @@
                         primary: '#00386d',
                         dark: '#b70000',
                         light: '#EAF4FA',
+                        green: '#28a745', // Add custom green color if necessary
+
                     },
                     backgroundImage: {
                         'gradient-dark': 'linear-gradient(to bottom right, #00386d, #005082)',
@@ -69,8 +71,10 @@
         <div class="mt-4 space-y-6">
             {% for item in combined_list %}
             <div class="group suggestion-item relative p-4 rounded-lg shadow-md 
-                {% if item.type == 'reminder' %} bg-primary text-white {% elif item.type == 'location' %} bg-dark text-light {% endif %}"
-                data-active="false" onclick="toggleSuggestionItem(this)">
+                {% if item.type == 'reminder' %}
+                    {% if item.is_happening %} bg-green text-white {% elif item.is_overdue %} bg-dark text-white {% else %} bg-primary text-white {% endif %}
+                {% elif item.type == 'location' %} bg-dark text-light {% endif %}" data-active="false"
+                onclick="toggleSuggestionItem(this)">
                 <h4 class="font-bold text-lg">
                     {% if item.type == "reminder" %}
                     {{ item.title }}
@@ -81,9 +85,15 @@
 
                 {% if item.type == "reminder" %}
                 <p class="font-semibold text-sm">{{ item.distance }} away</p>
-                <p class="font-semibold text-sm">{{ item.time_remaining }} to go</p>
+                {% if item.is_happening %}
+                <p class="font-semibold text-sm text-white">Happening Now</p>
+                {% elif item.is_overdue %}
+                <p class="font-semibold text-sm text-red-500">Missed</p>
+                {% else %}
+                <p class="font-semibold text-sm">{{ item.time_remaining }}</p>
+                {% endif %}
                 {% elif item.type == "location" %}
-                <p>{{ item.description }}</p>
+                <p class="text-sm">{{ item.description }}</p>
                 {% if item.weather %}
                 <p>Weather: {{ item.weather }}</p>
                 {% endif %}
@@ -93,15 +103,18 @@
                 <div class="suggestion-item-extra hidden">
                     <p class="suggestion-item-address">{{ item.address }}</p>
                     <div class="suggestion-item-buttons">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <path
-                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM7 11h10v2H7z">
-                            </path>
+                        <!-- Map Icon (Outlined) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="size-6">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <path
-                                d="M5 16v2h14v-2H5zm7-12C6.48 4 2 8.48 2 14s4.48 10 10 10 10-4.48 10-10S17.52 4 12 4zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z">
-                            </path>
+
+                        <!-- Saved Icon (Outlined) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 28 24" stroke-width="1.5"
+                            stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m19 21-7-4-7 4V3.889a.92.92 0 0 1 .244-.629.808.808 0 0 1 .59-.26h12.333a.81.81 0 0 1 .589.26.92.92 0 0 1 .244.63V21Z" />
                         </svg>
                     </div>
                 </div>
@@ -110,6 +123,7 @@
             {% empty %}
             <p class="text-center text-gray-300">No nearby suggestions found.</p>
             {% endfor %}
+
         </div>
     </div>
 

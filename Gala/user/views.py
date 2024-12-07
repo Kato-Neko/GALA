@@ -173,7 +173,15 @@ def home(request):
                 float(user_latitude), float(user_longitude),
                 float(reminder.latitude), float(reminder.longitude)
             )
-        
+
+        # Determine reminder status
+        reminder_start_datetime = datetime.combine(reminder.date, reminder.start_time)
+        reminder_end_datetime = (
+            datetime.combine(reminder.date, reminder.end_time) if reminder.end_time else None
+        )
+        is_happening = reminder_start_datetime <= now <= reminder_end_datetime if reminder_end_datetime else False
+        is_missed = now > reminder_end_datetime if reminder_end_datetime else False
+
         # Add to all_pins (for map display)
         all_pins.append({
             'type': 'reminder',
@@ -185,14 +193,16 @@ def home(request):
             'address': reminder.address,
             'image': reminder.image.url if reminder.image else "",
             'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
+            'is_happening': is_happening,
+
         })
 
-        # Include only reminders within 5km in combined_list
-        if distance and distance <= 5000:
-            reminder_datetime = datetime.combine(reminder.date, reminder.start_time)
-            time_remaining = reminder_datetime - now
-
-            if time_remaining.total_seconds() > 0:  # Only include upcoming reminders
+        # Include only upcoming or happening reminders within 5km
+        if distance and distance <= 5000 and not is_missed:
+            if is_happening:
+                formatted_time_remaining = "Happening Now"
+            else:
+                time_remaining = reminder_start_datetime - now
                 days = time_remaining.days
                 hours, remainder = divmod(time_remaining.seconds, 3600)
                 minutes, _ = divmod(remainder, 60)
@@ -205,23 +215,24 @@ def home(request):
                 if minutes > 0:
                     time_display.append(f"{minutes} minute{'s' if minutes > 1 else ''}")
 
-                formatted_time_remaining = ", ".join(time_display)
+                formatted_time_remaining = ", ".join(time_display) + " to go"
 
-                combined_list.append({
-                    'type': 'reminder',
-                    'title': reminder.description,
-                    'start': f"{reminder.date.strftime('%B %d, %Y')} {start_time}",
-                    'end': f"{reminder.date.strftime('%B %d, %Y')} {end_time}" if end_time else None,
-                    'latitude': reminder.latitude,
-                    'longitude': reminder.longitude,
-                    'address': reminder.address,
-                    'image': reminder.image.url if reminder.image else "",
-                    'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
-                    'time_remaining': formatted_time_remaining,
-                })
+            combined_list.append({
+                'type': 'reminder',
+                'title': reminder.description,
+                'start': f"{reminder.date.strftime('%B %d, %Y')} {start_time}",
+                'end': f"{reminder.date.strftime('%B %d, %Y')} {end_time}" if end_time else None,
+                'latitude': reminder.latitude,
+                'longitude': reminder.longitude,
+                'address': reminder.address,
+                'image': reminder.image.url if reminder.image else "",
+                'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
+                'time_remaining': formatted_time_remaining,
+                'is_happening': is_happening,
+            })
 
     # Sort reminders by time first, then by distance
-    combined_list.sort(key=lambda x: (x['time_remaining'], x['distance']))
+    combined_list.sort(key=lambda x: ('Happening Now' not in x['time_remaining'], x['time_remaining'], x['distance']))
 
     # Process locations
     for location in locations:

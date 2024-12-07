@@ -21,6 +21,17 @@
   display: none;
 }
 
+.suggestions-page .center-rectangle .suggestion-item.bg-green {
+  background-color: #28a745; /* Green color for Happening Now */
+  color: white;
+}
+
+/* Active state for green (Happening Now) */
+.suggestions-page .center-rectangle .suggestion-item.active.bg-green {
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #28a745; /* Keep the text green for active */
+}
+
 .suggestions-page .center-rectangle .suggestion-item.active.bg-primary {
   background-color: rgba(255, 255, 255, 0.8);
   color: #00386d; /* Blue for reminders */
@@ -37,20 +48,9 @@
   margin-top: 10px;
 }
 
-.suggestions-page .center-rectangle .suggestion-item-buttons svg {
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  fill: #00386d;
-  transition: fill 0.3s ease;
-}
-
-.suggestions-page .center-rectangle .suggestion-item-buttons svg:hover {
-  fill: #005082;
-}
-
-.suggestions-page .center-rectangle .suggestion-item-address {
-  margin-top: 8px;
-  font-size: 0.875rem;
-  color: #555;
+.suggestions-page .center-rectangle .suggestion-item-buttons {
+  display: flex;
+  justify-content: flex-end; /* Aligns the icons to the right */
+  gap: 10px; /* Adds spacing between icons */
+  margin-top: 10px;
 }

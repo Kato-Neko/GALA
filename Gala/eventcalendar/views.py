@@ -7,32 +7,6 @@ from .models import EventReminder
 from datetime import datetime, timedelta
 from math import sin, cos, sqrt, atan2, radians
 
-class ReminderListView(ListView):
-    model = EventReminder
-    template_name = 'reminder_list.php'
-    context_object_name = 'object_list'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Add events to the context for calendar
-        reminders = EventReminder.objects.all()
-        events = [
-            {
-                "id": reminder.event_reminder_id,
-                "title": reminder.description,
-                "start": f"{reminder.date}T{reminder.start_time}",
-                "end": f"{reminder.date}T{reminder.end_time}" if reminder.end_time else None,
-                "longitude": reminder.longitude if reminder.longitude is not None else "",
-                "latitude": reminder.latitude if reminder.latitude is not None else "",
-                "image": reminder.image.url if reminder.image else "",
-            }
-            for reminder in reminders
-        ]
-
-        context['events'] = events
-        context['object_list'] = reminders
-        return context
-
 class ReminderCreateView(CreateView):
     model = EventReminder
     template_name = 'reminder_create.html'
