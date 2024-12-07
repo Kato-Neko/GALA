@@ -11,9 +11,8 @@
             <!-- Scrollable Event List -->
             <div class="relative mt-4 space-y-6 h-full overflow-y-auto no-scrollbar z-10">
                 {% for reminder in reminders %}
-                <div
-                    class="event-item group relative p-4 rounded-2xl 
-                    {% if reminder.is_overdue %} bg-[#b70000] text-white {% else %} bg-[#00386d] text-white {% endif %}">
+                <div class="event-item group relative p-4 rounded-2xl text-white"
+                    style="background-color: {{ reminder.color }};">
                     {% if reminder.image %}
                     <img src="{{ reminder.image }}" alt="{{ reminder.title }}"
                         class="w-full h-32 object-cover rounded-lg mb-4">
@@ -21,7 +20,9 @@
                     <h4 class="font-bold text-lg">{{ reminder.title }}</h4>
                     <p>{{ reminder.address }}</p>
                     <p>Distance: {{ reminder.distance }}</p>
-                    {% if reminder.is_overdue %}
+                    {% if reminder.is_happening %}
+                    <p class="text-white font-bold">Happening Now</p>
+                    {% elif reminder.is_overdue %}
                     <p class="text-white font-bold">Missed</p>
                     {% else %}
                     <p>Time Remaining: {{ reminder.time_remaining }}</p>

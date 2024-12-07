@@ -74,12 +74,21 @@ class ReminderListView(ListView):
                     float(reminder.latitude), float(reminder.longitude)
                 )
 
-            # Calculate time remaining
-            reminder_datetime = datetime.combine(reminder.date, reminder.start_time)
-            time_remaining = reminder_datetime - now
+            # Determine start and end datetime of the reminder
+            reminder_start_datetime = datetime.combine(reminder.date, reminder.start_time)
+            reminder_end_datetime = (
+                datetime.combine(reminder.date, reminder.end_time) if reminder.end_time else None
+            )
 
-            # Format time dynamically, skipping 0 days or hours
-            if time_remaining.total_seconds() > 0:
+            # Determine reminder status
+            is_happening = reminder_start_datetime <= now <= reminder_end_datetime if reminder_end_datetime else False
+            is_missed = now > reminder_end_datetime if reminder_end_datetime else False
+
+            # Calculate time remaining
+            if is_happening:
+                formatted_time_remaining = "Happening Now"
+            elif not is_missed:
+                time_remaining = reminder_start_datetime - now
                 days = time_remaining.days
                 hours, remainder = divmod(time_remaining.seconds, 3600)
                 minutes, _ = divmod(remainder, 60)
@@ -96,6 +105,10 @@ class ReminderListView(ListView):
             else:
                 formatted_time_remaining = "Missed"
 
+            # Ensure no conflicting statuses
+            if is_happening and is_missed:
+                raise ValueError("An event cannot be both 'Happening' and 'Missed' at the same time.")
+
             # Store the reminder data for the list view
             reminder_data = {
                 "id": reminder.event_reminder_id,
@@ -107,10 +120,16 @@ class ReminderListView(ListView):
                 "image": reminder.image.url if reminder.image else "",
                 "address": reminder.address,
                 "distance": f"{distance / 1000:.2f} km" if distance else "Unknown",
-                "distance_value": distance if distance else float("inf"),  # Use infinity for unknown distances
+                "distance_value": distance if distance else float("inf"),
                 "time_remaining": formatted_time_remaining,
-                "time_remaining_value": time_remaining.total_seconds(),  # For sorting purposes
-                "is_overdue": time_remaining.total_seconds() < 0,
+                "time_remaining_value": (reminder_start_datetime - now).total_seconds() if not is_happening else 0,
+                "is_overdue": is_missed,
+                "is_happening": is_happening,
+                "color": (
+                    "#28a745" if is_happening else 
+                    "#b70000" if is_missed else  
+                    "#00386d" 
+                ),
             }
 
             # Append to the reminders list
@@ -122,15 +141,19 @@ class ReminderListView(ListView):
                 "title": reminder.description,
                 "start": f"{reminder.date}T{reminder.start_time}",
                 "end": f"{reminder.date}T{reminder.end_time}" if reminder.end_time else None,
-                "color": "#b70000" if reminder_data["is_overdue"] else "#00386d",  # Highlight missed events in red
-                "textColor": "#ffffff", 
+                "color": (
+                    "#28a745" if is_happening else  # Green for happening
+                    "#b70000" if is_missed else  # Red for missed
+                    "#00386d"  # Default blue for upcoming
+                ),
+                "textColor": "#ffffff",
             })
 
-        # Sort logic: prioritize future reminders by time first, then by distance
+        # Sort logic: prioritize happening events, then future reminders by time, and then by distance
         sorted_reminders.sort(
             key=lambda r: (
-                r["time_remaining_value"] if not r["is_overdue"] else float("inf"),  # Time for non-overdue events
-                r["distance_value"],  # Then by distance
+                0 if r["is_happening"] else (r["time_remaining_value"] if not r["is_overdue"] else float("inf")),
+                r["distance_value"],
             )
         )
 
