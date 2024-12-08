@@ -115,8 +115,14 @@
                 popupAnchor: [0, -50],
             });
 
-            const bgColor = type === 'reminder' ? 'rgba(0, 56, 109, 0.8)' : 'rgba(197, 48, 48, 0.8)';
-            const labelColor = type === 'reminder' ? 'bg-blue-700' : 'bg-red-400';
+            const bgColor = type === 'reminder'
+                ? (is_happening ? 'rgba(40, 167, 69, 0.8)' : 'rgba(0, 56, 109, 0.8)') // Green for happening, blue otherwise
+                : 'rgba(197, 48, 48, 0.8)'; // Red for locations
+
+            const labelColor = type === 'reminder'
+                ? (is_happening ? 'bg-green-700' : 'bg-blue-900') // Green for happening, blue otherwise
+                : 'bg-red-800'; // Red for locations
+
 
             let popupContent = `
         <div style="

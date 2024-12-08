@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="w-screen h-screen pt-10" style="background: linear-gradient(to bottom, #287dec, #e5d3be);">
+<div class="w-screen h-screen pt-10"
+    style="background: linear-gradient(to bottom, rgb(8, 68, 146), rgb(229, 211, 190));">
     <div class="grid grid-cols-7 gap-4 pt-20">
         <div class="col-span-1"></div>
 
@@ -71,16 +72,64 @@
 
 <!-- View Reminder Modal -->
 <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" id="view-reminder-modal">
-    <div class="bg-white p-8 rounded-lg shadow-lg max-w-sm w-full">
-        <h2 class="text-xl font-bold mb-4">Reminder Details</h2>
-        <div id="reminder-details"></div>
-        <div class="flex justify-between mt-4">
-            <a id="edit-reminder-link"
-                class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-700">Edit</a>
-            <a id="delete-reminder-link" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-700">Delete</a>
+    <div
+        class="bg-[rgba(229,211,190,0.8)] dark:bg-[rgba(0,72,166,0.8)] dark:text-white p-6 rounded-lg shadow-lg max-w-2xl w-full">
+        <div class="grid grid-cols-6 gap-4">
+            <!-- Image Section -->
+            <div class="flex justify-center items-center col-span-2">
+                <div class="p-2 border-4 border-dashed flex items-center justify-center w-full h-full">
+                    <div class="relative">
+                        <!-- Image Preview -->
+                        <img id="viewImagePreview" src="{% if event.image %}{{ event.image.url }}{% endif %}"
+                            alt="Preview"
+                            class="object-cover rounded-lg w-[500px] h-auto max-h-[700px] {% if not reminder.image %}hidden{% endif %}">
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reminder Details Section -->
+            <div
+                class="w-full border-2 rounded-lg p-6 col-span-4 flex flex-col justify-center bg-[rgba(173,250,217,0.2)] dark:bg-[rgba(3,2,84,0.4)]">
+                <h2 class="lobster-two-bold text-5xl text-gray-800 dark:text-white text-center pb-4">
+                    Reminder Details
+                </h2>
+                <div class="flex mt-2">
+                    <label class="font-bold mr-2 text-gray-700 dark:text-gray-300">Description:</label>
+                    <p id="viewDescription" class="text-gray-800 dark:text-white"></p>
+                </div>
+                <div class="flex mt-2">
+                    <label class="font-bold mr-2 text-gray-700 dark:text-gray-300">Date:</label>
+                    <p id="viewDate" class="text-gray-800 dark:text-white"></p>
+                </div>
+                <div class="flex mt-2">
+                    <label class="font-bold mr-2 text-gray-700 dark:text-gray-300">Time:</label>
+                    <p id="viewTime" class="text-gray-800 dark:text-white"></p>
+                </div>
+                <div class="flex mt-2">
+                    <label class="font-bold mr-2 text-gray-700 dark:text-gray-300">Longitude:</label>
+                    <p id="viewLongitude" class="text-gray-800 dark:text-white"></p>
+                </div>
+                <div class="flex mt-2">
+                    <label class="font-bold mr-2 text-gray-700 dark:text-gray-300">Latitude:</label>
+                    <p id="viewLatitude" class="text-gray-800 dark:text-white"></p>
+                </div>
+                <div class="flex mt-4 gap-x-2">
+                    <a id="edit-reminder-link"
+                        class="flex-1 text-yellow-700 hover:text-white border border-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-yellow-500 dark:text-yellow-500 dark:hover:text-white dark:hover:bg-yellow-600 dark:focus:ring-yellow-800">
+                        Edit
+                    </a>
+                    <a id="delete-reminder-link"
+                        class="flex-1 text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900">
+                        Delete
+                    </a>
+                </div>
+                <button type="button" onclick="closeViewModal()"
+                    class="flex-1 mt-4 text-gray-700 hover:text-white border border-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-gray-500 dark:text-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800">
+                    Close
+                </button>
+            </div>
         </div>
-        <button class="w-full mt-4 bg-gray-500 text-white py-2 rounded-md hover:bg-gray-700"
-            onclick="closeViewModal()">Close</button>
     </div>
 </div>
 
@@ -117,17 +166,12 @@
     }
 
     function openViewModal(event) {
-        const reminderDetails = document.getElementById('reminder-details');
-        const endTime = event.end ? moment(event.end).format('HH:mm') : 'No end time set';
-        const longitude = event.longitude || 'Not provided';
-        const latitude = event.latitude || 'Not provided';
 
-        reminderDetails.innerHTML = `
-            <p><strong>Description:</strong> ${event.title}</p>
-            <p><strong>Date:</strong> ${moment(event.start).format('YYYY-MM-DD')}</p>
-            <p><strong>Time:</strong> ${moment(event.start).format('HH:mm')} - ${endTime}</p>
-            <p><strong>Location:</strong> Latitude ${latitude}, Longitude ${longitude}</p>
-        `;
+        document.getElementById('viewDescription').innerText = event.title || 'No description available';
+        document.getElementById('viewDate').innerText = moment(event.start).format('YYYY-MM-DD') || 'No date';
+        document.getElementById('viewTime').innerText = `${moment(event.start).format('HH:mm')} - ${moment(event.end).format('HH:mm')}` || 'No time set';
+        document.getElementById('viewLongitude').innerText = event.longitude || 'No longitude available';
+        document.getElementById('viewLatitude').innerText = event.latitude || 'No latitude available';
 
         document.getElementById('edit-reminder-link').href = `update/${event.id}`;
         document.getElementById('delete-reminder-link').href = `delete/${event.id}`;

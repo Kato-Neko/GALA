@@ -93,7 +93,7 @@
                 <p class="font-semibold text-sm">{{ item.time_remaining }}</p>
                 {% endif %}
                 {% elif item.type == "location" %}
-                <p class="text-sm">{{ item.description }}</p>
+
                 {% if item.weather %}
                 <p>Weather: {{ item.weather }}</p>
                 {% endif %}
@@ -101,7 +101,7 @@
                 {% endif %}
 
                 <div class="suggestion-item-extra hidden">
-                    <p class="suggestion-item-address">{{ item.address }}</p>
+                    <p class="suggestion-item-address font-bold mt-2">{{ item.address }}</p>
                     <div class="suggestion-item-buttons">
                         <!-- Map Icon (Outlined) -->
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"

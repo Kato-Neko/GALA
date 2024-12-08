@@ -45,11 +45,11 @@
             <div class="w-full border-2 rounded-lg p-6 col-span-2 flex justify-center items-center 
                 bg-[rgba(173,250,217,0.2)] dark:bg-[rgba(3,2,84,0.4)]">
                 <div class="w-full max-w-lg">
-                    <div class="lobster-two-bold text-5xl flex justify-center text-gray-800 dark:text-white pb-2">
+                    <div class="lobster-two-bold text-5xl flex justify-center text-gray-800 dark:text-white pt-3 pb-1">
                         Update Reminder
                     </div>
 
-                    <div class="mb-4 p-4 text-red-700 rounded-md">
+                    <div class="mb-4 p-4 text-red-700 dark:text-red-300 rounded-md">
                         <ul>
                             {% for field, errors in form.errors.items %}
                             <li>
@@ -82,7 +82,7 @@
                             </span>
                             <input type="time" name="start_time" id="id_start_time"
                                 value="{{ form.start_time.value|time:'H:i' }}"
-                                class="rounded-none rounded-e-lg bg-gray-50 border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                class="rounded-none rounded-e-rg bg-gray-50 border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                 placeholder="Start Time">
                         </div>
 
@@ -138,14 +138,15 @@
                         </div>
                     </div>
 
-                    <!-- Submit Button -->
-                    <div class="flex justify-between mt-2 text-white rounded-lg">
+                    <div class="flex mt-4 text-white rounded-lg gap-x-2">
                         <button type="submit"
-                            class="w-1/2 text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-green-500 dark:text-green-500 dark:hover:text-white dark:hover:bg-green-600 dark:focus:ring-green-800">
-                            Update</button>
+                            class="flex-1 text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-green-500 dark:text-green-500 dark:hover:text-white dark:hover:bg-green-600 dark:focus:ring-green-800">
+                            Update
+                        </button>
                         <button type="button" onclick="window.location.href='{% url 'reminder-list' %}'"
-                            class="w-1/2 text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900">
-                            Cancel</button>
+                            class="flex-1 text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900">
+                            Cancel
+                        </button>
                     </div>
                 </div>
             </div>
