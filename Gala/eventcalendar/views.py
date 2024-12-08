@@ -1,8 +1,11 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from .utils import get_address_from_coordinates
 from django.views.generic import UpdateView
+from django.forms import ValidationError
 from django.urls import reverse_lazy
+
 from .models import EventReminder
+from .forms import EventReminderForm
+from .utils import get_address_from_coordinates
 
 from datetime import datetime, timedelta
 from math import sin, cos, sqrt, atan2, radians
@@ -22,20 +25,48 @@ class ReminderCreateView(CreateView):
 
 class ReminderUpdateView(UpdateView):
     model = EventReminder
-    fields = ['description', 'start_time', 'end_time', 'date', 'longitude', 'latitude', 'image']  # Include 'image'
-    template_name = 'reminder_update.html'
+    template_name = 'reminder_update.php'
+    fields = ['description', 'start_time', 'end_time', 'date', 'longitude', 'latitude', 'image']
     success_url = reverse_lazy('reminder-list')
 
     def form_valid(self, form):
-        # Handle existing image if no new one is uploaded
-        if 'image' not in self.request.FILES:
-            form.instance.image = self.get_object().image
-        
-        # Fetch a new address if the coordinates are updated
+        # Check if all required fields are filled out
+        if not form.cleaned_data.get('description'):
+            form.add_error('description', 'Description is required.')
+
+        if not form.cleaned_data.get('start_time'):
+            form.add_error('start_time', 'Start time is required.')
+
+        if not form.cleaned_data.get('end_time'):
+            form.add_error('end_time', 'End time is required.')
+
+        if not form.cleaned_data.get('date'):
+            form.add_error('date', 'Date is required.')
+
+        if not form.cleaned_data.get('longitude') or not form.cleaned_data.get('latitude'):
+            form.add_error('longitude', 'Both Longitude and Latitude are required.')
+
         if form.instance.latitude and form.instance.longitude:
-            api_key = "ge-ea5a9c6688e4ac48"  # Replace with your actual API key
+            api_key = "ge-ea5a9c6688e4ac48"
             form.instance.address = get_address_from_coordinates(form.instance.latitude, form.instance.longitude, api_key)
+
+        # If there are errors, return to form invalid view
+        if form.errors:
+            return self.form_invalid(form)
+
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        # Log any errors for debugging purposes (optional)
+        for field, error in form.errors.items():
+            print(f"Error in field '{field}': {error}")
+
+        return super().form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['reminder'] = self.object  # Pass the reminder instance to the template
+        return context
 
 class ReminderDeleteView(DeleteView):
     model = EventReminder

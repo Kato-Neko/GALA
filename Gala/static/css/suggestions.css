@@ -23,6 +23,7 @@
 
 .suggestions-page .center-rectangle .suggestion-item.bg-green {
   background-color: #28a745; /* Green color for Happening Now */
+  color: rgba(173, 250, 217, 0.702);
   color: white;
 }
 
