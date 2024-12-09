@@ -182,7 +182,7 @@ def home(request):
         is_happening = reminder_start_datetime <= now <= reminder_end_datetime if reminder_end_datetime else False
         is_missed = now > reminder_end_datetime if reminder_end_datetime else False
 
-        # Add to all_pins (for map display)
+        # Add all reminders to all_pins, marking those outside 5km as transparent
         all_pins.append({
             'type': 'reminder',
             'title': reminder.description,
@@ -194,8 +194,9 @@ def home(request):
             'image': reminder.image.url if reminder.image else "",
             'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
             'is_happening': is_happening,
-
+            'is_within_5km': distance and distance <= 5000  # Add this flag
         })
+
 
         # Include only upcoming or happening reminders within 5km
         if distance and distance <= 5000 and not is_missed:

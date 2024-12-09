@@ -12,7 +12,7 @@ from math import sin, cos, sqrt, atan2, radians
 
 class ReminderCreateView(CreateView):
     model = EventReminder
-    template_name = 'reminder_create.html'
+    template_name = 'reminder_creater.html'
     fields = ['description', 'start_time', 'end_time', 'date', 'longitude', 'latitude', 'image']  # Include 'image'
     success_url = reverse_lazy('reminder-list')
 
@@ -144,8 +144,9 @@ class ReminderListView(ListView):
             reminder_data = {
                 "id": reminder.event_reminder_id,
                 "title": reminder.description,
-                "start": f"{reminder.date}T{reminder.start_time}",
-                "end": f"{reminder.date}T{reminder.end_time}" if reminder.end_time else None,
+                "date": reminder.date.strftime("%Y-%m-%d"),  # Format date as YYYY-MM-DD
+                "start": reminder.start_time.strftime("%H:%M") if reminder.start_time else None,  # Format time as HH:MM
+                "end": reminder.end_time.strftime("%H:%M") if reminder.end_time else None,
                 "longitude": reminder.longitude,
                 "latitude": reminder.latitude,
                 "image": reminder.image.url if reminder.image else "",

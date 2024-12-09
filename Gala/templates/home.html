@@ -88,17 +88,9 @@
                 distance,
                 image,
                 address,
-                is_happening
+                is_happening,
+                is_within_5km
             } = item;
-
-            // Ensure distance is numeric (convert from string if necessary)
-            let numericDistance = parseFloat(distance);
-            if (distance.includes("km")) {
-                numericDistance *= 1000; // Convert km to meters
-            }
-
-            // Determine if the marker is within the 5km radius
-            const isWithin5km = numericDistance <= 5000; // 5000 meters = 5 km
 
             // Determine the icon URL based on the event type and status
             const iconUrl = type === 'reminder'
@@ -119,10 +111,8 @@
                 ? (is_happening ? 'rgba(40, 167, 69, 0.8)' : 'rgba(0, 56, 109, 0.8)') // Green for happening, blue otherwise
                 : 'rgba(197, 48, 48, 0.8)'; // Red for locations
 
-            const labelColor = type === 'reminder'
-                ? (is_happening ? 'bg-green-700' : 'bg-blue-900') // Green for happening, blue otherwise
-                : 'bg-red-800'; // Red for locations
-
+            // Adjust opacity based on the distance
+            const markerOpacity = is_happening && is_within_5km ? 1 : (is_within_5km ? 1 : 0.5);
 
             let popupContent = `
         <div style="
@@ -145,11 +135,11 @@
                 ${type === 'reminder' ? title : name}
             </h3>
             <p style="margin: 5px 0; font-size: 1em; text-align: center;">${address || 'Address not available'}</p>
-    `;
+        `;
 
             if (type === 'reminder') {
                 popupContent += `
-            <span class="inline-block px-3 py-1 text-xs font-medium text-white rounded ${labelColor}">
+            <span class="inline-block px-3 py-1 text-xs font-medium text-white rounded ${is_happening ? 'bg-green-700' : 'bg-blue-900'}">
                 Reminder
             </span>
             <p><strong>Start:</strong> ${start}</p>
@@ -157,7 +147,7 @@
         `;
             } else if (type === 'location') {
                 popupContent += `
-            <span class="inline-block px-3 py-1 text-xs font-medium text-white rounded ${labelColor}">
+            <span class="inline-block px-3 py-1 text-xs font-medium text-white rounded bg-red-800">
                 Location
             </span>
             <p><strong>Description:</strong> ${description}</p>
@@ -172,16 +162,16 @@
 
             const marker = L.marker([latitude, longitude], {
                 icon: customIcon,
-                opacity: isWithin5km ? 1 : 0.5 // Adjust opacity for markers outside 5km radius
+                opacity: markerOpacity // Use adjusted opacity
             }).bindPopup(popupContent, { className: 'custom-popup' });
 
             // Add the marker to the feature group
             marker.addTo(allMarkers);
         });
 
+
         // Add all markers to the map
         allMarkers.addTo(map);
-
 
         function getUserLocation() {
             if (navigator.geolocation) {
@@ -194,7 +184,7 @@
                         map.setView([userLatitude, userLongitude], 13); // Adjust the zoom level as needed
 
                         // Add the 7km radius circle to the map
-                        const radiusInMeters = 7000;
+                        const radiusInMeters = 5000;
                         const userLocationCircle = L.circle([userLatitude, userLongitude], {
                             fillColor: 'yellow',
                             fillOpacity: 0.4,
