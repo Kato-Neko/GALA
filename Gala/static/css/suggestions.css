@@ -15,126 +15,44 @@
   overflow: scroll;
   scroll-behavior: initial;
   height: 75%;
-  scrollbar-width: none; /* For Firefox */
+  scrollbar-width: none;
 }
 
 .suggestions-page .center-rectangle::-webkit-scrollbar {
-  display: none; /* For Chrome, Safari, and Edge */
+  display: none;
 }
 
-.suggestions-page .center-rectangle:hover {
-  transform: scale(1.03);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+.suggestions-page .center-rectangle .suggestion-item.bg-green {
+  background-color: #28a745; /* Green color for Happening Now */
+  color: rgba(173, 250, 217, 0.702);
+  color: white;
 }
 
-.suggestions-page .event-item {
-  display: grid;
-  grid-template-columns: 1fr;
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  border-radius: 12px;
-  padding: 15px;
-  transition: all 0.3s ease-in-out;
-  overflow: hidden;
-  background-color: #ffffff;
-  color: #00386d;
-  border: 1px solid #00386d;
+/* Active state for green (Happening Now) */
+.suggestions-page .center-rectangle .suggestion-item.active.bg-green {
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #28a745; /* Keep the text green for active */
 }
 
-.suggestions-page .event-item:hover {
-  background-color: #00386d;
-  color: #ffffff;
-  border-color: #ffffff;
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+.suggestions-page .center-rectangle .suggestion-item.active.bg-primary {
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #00386d; /* Blue for reminders */
 }
 
-.suggestions-page .event-item h4 {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 5px;
+.suggestions-page .center-rectangle .suggestion-item.active.bg-dark {
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #b70000; /* Red for locations */
 }
 
-.suggestions-page .event-item p {
-  font-size: 0.9rem;
-  color: #555;
+.suggestions-page .center-rectangle .suggestion-item-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
 }
 
-/* Color change for the date when hovering over the event item */
-.suggestions-page .event-item .event-date {
-  color: #00386d; /* Initial color */
-  transition: color 0.3s ease; /* Smooth transition for color change */
-}
-
-.suggestions-page .event-item:hover .event-date {
-  color: #ffffff; /* Color change on hover */
-}
-
-/* Horizontal line style */
-.suggestions-page .event-item::before {
-  content: "";
-  display: block;
-  height: 4px;
-  width: 100%;
-  background: linear-gradient(to right, #00386d, #005082);
-  border-radius: 4px;
-  margin-bottom: 10px;
-  transition: background 0.3s ease;
-}
-
-/* Change the gradient of the line when hovering over the event item */
-.suggestions-page .event-item:hover::before {
-  background: linear-gradient(
-    to right,
-    #ffffff,
-    #00386d
-  ); /* Reversed gradient on hover */
-}
-
-.suggestions-page .event-location {
-  color: #00386d; /* Initial color */
-  transition: color 0.3s ease; /* Smooth transition for color change */
-}
-
-.suggestions-page .event-item:hover .event-location {
-  color: #ffffff; /* Change to white on hover */
-}
-
-@media screen and (max-width: 768px) {
-  .suggestions-page .event-item {
-    padding: 12px;
-  }
-
-  .suggestions-page .event-item h4 {
-    font-size: 1rem;
-  }
-
-  .suggestions-page .event-item p {
-    font-size: 0.8rem;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .suggestions-page .event-item {
-    padding: 10px;
-  }
-
-  .suggestions-page .event-item h4 {
-    font-size: 0.9rem;
-  }
-
-  .suggestions-page .event-item p {
-    font-size: 0.7rem;
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.suggestions-page .center-rectangle .suggestion-item-buttons {
+  display: flex;
+  justify-content: flex-end; /* Aligns the icons to the right */
+  gap: 10px; /* Adds spacing between icons */
+  margin-top: 10px;
 }

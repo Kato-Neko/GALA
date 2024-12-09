@@ -3,16 +3,16 @@
 
 {% block content %}
 
-<body class="imnida" style="background: linear-gradient(to bottom, #e0f7fa, #ffffff); min-height: 100vh;">
+<body class="imnida" style="background: linear-gradient(to bottom, #287dec, #e5d3be); min-height: 100vh;">
     <div class="main-content relative py-10 px-4" style="padding-top: 120px;">
         <div class="container mx-auto">
             <!-- Header Section -->
             <div class="text-center mb-6">
-                <h1 class="text-4xl font-extrabold text-red-500 tracking-wide drop-shadow-md">
+                <h1 class="text-4xl font-extrabold text-white tracking-wide drop-shadow-md">
                     🎄 Location Recommendations 🎁
                 </h1>
-                <h2 class="text-2xl font-semibold text-red-400 mt-2 drop-shadow-md">
-                    Within a 5000-meter radius
+                <h2 class="text-2xl font-semibold text-white mt-2 drop-shadow-md">
+                    Within a 5 kilometer radius
                 </h2>
             </div>
 
@@ -23,7 +23,7 @@
                         placeholder="Enter your current location (Latitude, Longitude)"
                         class="flex-grow p-4 text-gray-700 focus:outline-none" />
                     <button id="locate-me"
-                        class="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 transition">
+                        class="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-3 transition">
                         Use My Location
                     </button>
                 </div>
@@ -42,13 +42,14 @@
                     data-name="{{ location.name|lower }}" data-description="{{ location.description|lower }}">
                     <!-- Image Section -->
                     {% if location.image %}
-                    <img src="{{ location.image.url }}" alt="{{ location.name }}" class="w-full h-32 object-cover rounded-lg mb-4">
+                    <img src="{{ location.image.url }}" alt="{{ location.name }}"
+                        class="w-full h-32 object-cover rounded-lg mb-4">
                     {% else %}
                     <div class="w-full h-32 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 mb-4">
                         No Image
                     </div>
                     {% endif %}
-                    
+
                     <!-- Location Details -->
                     <h3 class="text-xl font-bold text-red-500 mb-2">
                         {{ location.name }}

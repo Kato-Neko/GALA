@@ -26,5 +26,6 @@ urlpatterns = [
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 
     #others
+    path('search', views.search, name='search'),
     path('api/user-location', views.save_user_location, name='save_user_location'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

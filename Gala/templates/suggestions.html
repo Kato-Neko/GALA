@@ -19,6 +19,8 @@
                         primary: '#00386d',
                         dark: '#b70000',
                         light: '#EAF4FA',
+                        green: '#28a745', // Add custom green color if necessary
+
                     },
                     backgroundImage: {
                         'gradient-dark': 'linear-gradient(to bottom right, #00386d, #005082)',
@@ -26,6 +28,25 @@
                 },
             },
         };
+
+        function toggleSuggestionItem(item) {
+            const isActive = item.getAttribute("data-active") === "true";
+
+            document.querySelectorAll('.suggestion-item').forEach((el) => {
+                el.classList.remove("active");
+                el.setAttribute("data-active", "false");
+                el.querySelector(".suggestion-item-extra").classList.add("hidden");
+            });
+
+            if (!isActive) {
+                item.classList.add("active");
+                item.setAttribute("data-active", "true");
+                const extraContent = item.querySelector(".suggestion-item-extra");
+                if (extraContent) {
+                    extraContent.classList.remove("hidden");
+                }
+            }
+        }
     </script>
 
     <link rel="stylesheet" href="{% static 'css/suggestions.css' %}">
@@ -38,44 +59,78 @@
         rel="stylesheet">
 </head>
 
-<body class="suggestions-page bg-gray-100"
-    data-user-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
+<body class="suggestions-page" data-user-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
 
-    <div class="center-rectangle bg-dark bg-opacity-90 shadow-xl p-10 rounded-2xl max-w-xl w-full">
+    <div class="center-rectangle shadow-xl p-10 rounded-2xl max-w-xl w-full">
+        <div class="center-rectangle-background"></div>
         <h2 class="outfit sticky top-0 text-2xl font-regular text-primary text-center mb-6">
-            UPCOMING <span class="lobster-two-bold text-4xl font-bold text-white"> GALA </span> EVENTS NEAR YOU
+            <span class="lobster-two-bold text-4xl font-bold text-white"> GALA </span> EVENTS HAPPENING NEAR YOU
         </h2>
 
         <div class="mt-4 space-y-6">
             {% for item in combined_list %}
-            <div
-                class="group relative bg-opacity-90 p-4 rounded-lg shadow-md 
-                {% if item.type == 'reminder' %} bg-primary text-white {% elif item.type == 'location' %} bg-dark text-light {% endif %}">
+            <div class="group suggestion-item relative p-4 rounded-lg shadow-md 
+                {% if item.type == 'reminder' %}
+                    {% if item.is_happening %} bg-green text-white {% elif item.is_overdue %} bg-dark text-white {% else %} bg-primary text-white {% endif %}
+                {% elif item.type == 'location' %} bg-dark text-light {% endif %}" data-active="false"
+                onclick="toggleSuggestionItem(this)">
+                <h4 class="font-bold text-lg">
+                    {% if item.type == "reminder" %}
+                    {{ item.title }}
+                    {% else %}
+                    {{ item.name }}
+                    {% endif %}
+                </h4>
 
                 {% if item.type == "reminder" %}
-                <h4 class="font-bold text-lg">{{ item.title }}</h4>
-                <p>Start: {{ item.start }}</p>
-                {% if item.end %}
-                <p>End: {{ item.end }}</p>
+                <p class="font-semibold text-sm">{{ item.distance }} away</p>
+                {% if item.is_happening %}
+                <p class="font-semibold text-sm text-white">Happening Now</p>
+                {% elif item.is_overdue %}
+                <p class="font-semibold text-sm text-red-500">Missed</p>
+                {% else %}
+                <p class="font-semibold text-sm">{{ item.time_remaining }}</p>
                 {% endif %}
-                <p class="font-semibold">Distance: {{ item.distance }}</p>
-
                 {% elif item.type == "location" %}
-                <h4 class="font-bold text-lg">{{ item.name }}</h4>
-                <p>{{ item.description }}</p>
+
+                <p class="font-semibold text-sm"> {{ item.distance }} away</p>
                 {% if item.weather %}
-                <p>Weather: {{ item.weather }}</p>
+                <p>{{ item.weather }}</p>
                 {% endif %}
-                <p class="font-semibold">Distance: {{ item.distance }}</p>
                 {% endif %}
 
+                <div class="suggestion-item-extra hidden">
+                    <p class="suggestion-item-address font-bold mt-2">{{ item.address }}</p>
+                    <div class="suggestion-item-buttons">
+                        <!-- Map Icon (Outlined) -->
+                        <button class="map-icon" data-latitude="{{ item.latitude }}"
+                            data-longitude="{{ item.longitude }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="size-6">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
+                            </svg>
+                        </button>
+
+                        <!-- Saved Icon (Outlined) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 28 24" stroke-width="1.5"
+                            stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m19 21-7-4-7 4V3.889a.92.92 0 0 1 .244-.629.808.808 0 0 1 .59-.26h12.333a.81.81 0 0 1 .589.26.92.92 0 0 1 .244.63V21Z" />
+                        </svg>
+                    </div>
+                </div>
             </div>
+
             {% empty %}
             <p class="text-center text-gray-300">No nearby suggestions found.</p>
             {% endfor %}
-        </div>
 
+        </div>
     </div>
+
+
 </body>
 
 </html>

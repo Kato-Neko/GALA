@@ -10,7 +10,8 @@ GALA - Account Management
 </head>
 
 {% block content %}
-<div class="h-screen flex items-center justify-center" style="background: rgba(3, 2, 84, 0.4);">
+<div class="h-screen flex items-center justify-center"
+    style="background: linear-gradient(to bottom, #287dec, #e5d3be);">
     <form id="update-account-form" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="grid grid-cols-6 gap-4">
@@ -20,24 +21,39 @@ GALA - Account Management
 
             <!-- First column: Avatar with fixed width -->
             <div class="flex justify-center items-center col-span-2">
-                <div class="p-2 border-4 border-dashed relative w-full h-full overflow-hidden"
-                    style="border-color: rgba(3, 2, 84, 0.4);">
-                    <!-- Fixed width and height -->
-                    <div class="profile-picture mx-auto flex items-center justify-center relative w-full h-full">
-                        {% if user.is_authenticated and user.profile.profile_picture %}
-                        <img id="profile-picture-preview" src="{{ user.profile.profile_picture.url }}"
-                            alt="Profile Picture" class="object-cover w-full h-full">
-                        {% else %}
-                        <span class="placeholder-icon text-4xl font-medium text-gray-400 absolute">+</span>
-                        {% endif %}
-                        <input type="file" name="profile_picture" id="profile_picture"
-                            class="absolute inset-0 opacity-0 cursor-pointer">
-                    </div>
+                <div class="p-2 border-4 border-dashed flex items-center justify-center w-full h-full">
+                    <label for="profile_picture"
+                        class="event-picture cursor-pointer flex flex-col items-center justify-center">
+                        <div class="relative">
+                            <!-- Image Preview -->
+                            <img id="imagePreview"
+                                src="{% if user.profile.profile_picture %}{{ user.profile.profile_picture.url }}{% else %}# {% endif %}"
+                                alt="Profile Picture Preview"
+                                class="object-cover rounded-lg w-[500px] h-auto max-h-[700px] {% if not user.profile.profile_picture %}hidden{% endif %}">
+
+                            <!-- Placeholder (shown when no image is selected) -->
+                            {% if not user.profile.profile_picture %}
+                            <div id="placeholder" class="flex flex-col items-center">
+                                <p class="text-white text-center">Click to upload an image</p>
+                                <div
+                                    class="mt-2 w-[100px] h-[100px] bg-gray-200 rounded-full flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="gray" class="w-8 h-8">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M12 16.5v-9m-4.5 4.5h9M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </label>
+                    <input type="file" name="profile_picture" id="profile_picture" class="hidden"
+                        onchange="previewImage(event)">
                 </div>
             </div>
 
             <!-- Second column: Form content -->
-            <div class="w-full border-2 border-gray-500 rounded-lg p-6 col-span-2 flex justify-center items-center"
+            <div class="w-full border-2 rounded-lg p-6 col-span-2 flex justify-center items-center"
                 style="background: rgba(3, 2, 84, 0.4);">
                 <div class="w-full max-w-lg">
                     <!-- Email Address -->
@@ -160,4 +176,23 @@ GALA - Account Management
         </div>
     </form>
 </div>
+
+
+<script>
+function previewImage(event) {
+    const fileInput = event.target;
+    const preview = document.getElementById('imagePreview');
+    const placeholder = document.getElementById('placeholder');
+
+    if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.remove('hidden'); // Show the image preview
+            placeholder?.classList.add('hidden'); // Hide the placeholder
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+    }
+}
+</script>
 {% endblock %}
