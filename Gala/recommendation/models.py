@@ -7,6 +7,7 @@ class Location(models.Model):
     longitude = models.FloatField()
     image = models.ImageField(upload_to='location_images/', blank=True, null=True)
     address = models.CharField(max_length=500, blank=True, null=True)
+    weather = models.TextField(max_length=500, blank=True, null=True)
 
     class Meta:
         indexes = [
