@@ -15,6 +15,9 @@ from eventcalendar.models import EventReminder
 from recommendation.models import Location
 from math import radians, sin, cos, sqrt, atan2
 
+from recommendation.utils import get_weather_data
+
+
 import json
 
 class CustomUserCreationForm(UserCreationForm):
@@ -188,10 +191,15 @@ def home(request):
     # Add locations to the combined list
     for location in locations:
         distance = None
+        weather = None  # Initialize weather variable
         if user_latitude and user_longitude and location.latitude and location.longitude:
             distance = calculate_distance(
                 float(user_latitude), float(user_longitude),
                 float(location.latitude), float(location.longitude)
+            )
+            # Fetch dynamic weather data
+            weather = get_weather_data(
+                location.latitude, location.longitude, "7334d2a0bf94493b8b894516240812"
             )
 
         if distance is not None and distance <= 5000:  # 5 km in meters
@@ -202,7 +210,7 @@ def home(request):
                 'longitude': location.longitude,
                 'latitude': location.latitude,
                 'address': location.address,
-                'weather': location.weather,
+                'weather': weather,  # Add dynamically fetched weather data
                 'distance_value': distance,  # Add raw distance for sorting
                 'distance': f"{distance / 1000:.2f} km",  # Convert to km for display
             })

@@ -57,7 +57,14 @@
                     <ul class="text-sm text-gray-700 space-y-1">
                         <li><strong>Longitude:</strong> {{ location.longitude }}</li>
                         <li><strong>Latitude:</strong> {{ location.latitude }}</li>
-                        <li><strong>Weather:</strong> {{ location.weather }}</li>
+                        <li><strong>Weather:</strong> 
+                            {% if location.weather_data %}
+                                <span>Temperature: {{ location.weather_data.temperature }}°C</span>, 
+                                <span>Condition: {{ location.weather_data.condition }}</span>
+                            {% else %}
+                                <span>Weather data unavailable</span>
+                            {% endif %}
+                        </li>
                     </ul>
                 </div>
                 {% empty %}

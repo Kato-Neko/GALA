@@ -2,16 +2,16 @@ from django.db import models
 
 class Location(models.Model):
     name = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)  
+    description = models.TextField(blank=True, null=True)
     latitude = models.FloatField()
     longitude = models.FloatField()
-    weather = models.CharField(max_length=255, default="Unknown", blank=True, null=True)  
-    image = models.ImageField(upload_to='location_images/', blank=True, null=True) 
-    address = models.CharField(max_length=500, blank=True, null=True)  
+    image = models.ImageField(upload_to='location_images/', blank=True, null=True)
+    address = models.CharField(max_length=500, blank=True, null=True)
+
     class Meta:
         indexes = [
-            models.Index(fields=['latitude', 'longitude']),  
-            models.Index(fields=['name']),  
+            models.Index(fields=['latitude', 'longitude']),
+            models.Index(fields=['name']),
         ]
         verbose_name = "Location"
         verbose_name_plural = "Locations"
