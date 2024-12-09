@@ -10,6 +10,7 @@ class EventReminder(models.Model):
     latitude = models.FloatField(null=True, blank=True)
     address = models.CharField(max_length=500, blank=True, null=True) 
     image = models.ImageField(upload_to='reminder_images/', null=True, blank=True)  # Add this field
+    is_saved = models.BooleanField(default=False)  # New field for saving state
 
     def __str__(self):
         return self.description

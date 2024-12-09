@@ -9,6 +9,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from user.models import Profile
 from django import forms
@@ -173,6 +174,8 @@ def home(request):
 
     # Process reminders
     for reminder in reminders:
+        print(f"Reminder ID: {reminder.event_reminder_id}")  # Check if this ID exists
+
         start_time = reminder.start_time.strftime("%I:%M %p") if reminder.start_time else ""
         end_time = reminder.end_time.strftime("%I:%M %p") if reminder.end_time else None
         distance = None
@@ -194,6 +197,8 @@ def home(request):
         # Add all reminders to all_pins, marking those outside 5km as transparent
         all_pins.append({
             'type': 'reminder',
+            'event_reminder_id': reminder.event_reminder_id,  # Ensure this is added
+            'is_saved': reminder.is_saved,
             'title': reminder.description,
             'start': f"{reminder.date.strftime('%B %d, %Y')} {start_time}",
             'end': f"{reminder.date.strftime('%B %d, %Y')} {end_time}" if end_time else None,
@@ -229,6 +234,8 @@ def home(request):
 
             combined_list.append({
                 'type': 'reminder',
+                'event_reminder_id': reminder.event_reminder_id,  # Ensure this is added
+                'is_saved': reminder.is_saved,  # Include this
                 'title': reminder.description,
                 'start': f"{reminder.date.strftime('%B %d, %Y')} {start_time}",
                 'end': f"{reminder.date.strftime('%B %d, %Y')} {end_time}" if end_time else None,
@@ -351,3 +358,12 @@ def search(request):
             })
 
     return JsonResponse(results, safe=False)
+
+@csrf_exempt
+def toggle_save(request, event_id):
+    if request.method == 'POST':
+        event = get_object_or_404(EventReminder, pk=event_id)
+        event.is_saved = not event.is_saved  # Toggle the is_saved state
+        event.save()
+        return JsonResponse({'success': True, 'is_saved': event.is_saved})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)

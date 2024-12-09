@@ -28,4 +28,5 @@ urlpatterns = [
     #others
     path('search', views.search, name='search'),
     path('api/user-location', views.save_user_location, name='save_user_location'),
+    path('toggle-save/<int:event_id>/', views.toggle_save, name='toggle-save'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

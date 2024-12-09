@@ -47,6 +47,51 @@
                 }
             }
         }
+
+        function toggleSave(eventId, button) {
+            if (!eventId) {
+                console.error('Invalid event ID:', eventId);
+                return;
+            }
+
+            fetch(`/toggle-save/${eventId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        const isSaved = data.is_saved;
+
+                        // Get the dynamic color from the parent element
+                        const parent = button.closest('.suggestion-item');
+                        const computedStyle = window.getComputedStyle(parent);
+                        const dynamicColor = computedStyle.backgroundColor;
+
+                        // Toggle visibility and set colors dynamically
+                        const savedSVG = button.querySelector('.saved-svg path');
+                        const unsavedSVG = button.querySelector('.unsaved-svg path');
+
+                        if (isSaved) {
+                            button.querySelector('.saved-svg').classList.remove('hidden');
+                            button.querySelector('.unsaved-svg').classList.add('hidden');
+                            savedSVG.setAttribute('fill', dynamicColor);
+                        } else {
+                            button.querySelector('.saved-svg').classList.add('hidden');
+                            button.querySelector('.unsaved-svg').classList.remove('hidden');
+                            unsavedSVG.setAttribute('stroke', dynamicColor);
+                            unsavedSVG.setAttribute('fill', 'none'); // Ensure no fill on unsaved
+                        }
+                    } else {
+                        console.error('Error toggling save state:', data.error);
+                    }
+                })
+                .catch((error) => console.error('Error:', error));
+        }
+
     </script>
 
     <link rel="stylesheet" href="{% static 'css/suggestions.css' %}">
@@ -113,12 +158,27 @@
                             </svg>
                         </button>
 
-                        <!-- Saved Icon (Outlined) -->
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 28 24" stroke-width="1.5"
-                            stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="m19 21-7-4-7 4V3.889a.92.92 0 0 1 .244-.629.808.808 0 0 1 .59-.26h12.333a.81.81 0 0 1 .589.26.92.92 0 0 1 .244.63V21Z" />
-                        </svg>
+                        <!-- Save Button -->
+                        <button onclick="toggleSave({{ item.event_reminder_id|default:'null' }}, this)"
+                            class="save-button">
+                            <!-- Saved SVG -->
+                            <svg class="saved-svg {% if not item.is_saved %}hidden{% endif %}"
+                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <path
+                                    d="M7.833 2c-.507 0-.98.216-1.318.576A1.92 1.92 0 0 0 6 3.89V21a1 1 0 0 0 1.625.78L12 18.28l4.375 3.5A1 1 0 0 0 18 21V3.889c0-.481-.178-.954-.515-1.313A1.808 1.808 0 0 0 16.167 2H7.833Z"
+                                    fill="currentColor" />
+                            </svg>
+
+                            <!-- Unsaved SVG -->
+                            <svg class="unsaved-svg {% if item.is_saved %}hidden{% endif %}"
+                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <path
+                                    d="m17 21-5-4-5 4V3.889a.92.92 0 0 1 .244-.629.808.808 0 0 1 .59-.26h8.333a.81.81 0 0 1 .589.26.92.92 0 0 1 .244.63V21Z"
+                                    fill="none" stroke="currentColor" stroke-width="2" />
+                            </svg>
+
+
+                        </button>
                     </div>
                 </div>
             </div>

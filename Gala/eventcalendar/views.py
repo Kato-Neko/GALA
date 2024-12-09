@@ -1,5 +1,6 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.views.generic import UpdateView
+from django.shortcuts import get_object_or_404
 from django.forms import ValidationError
 from django.urls import reverse_lazy
 
@@ -22,6 +23,14 @@ class ReminderCreateView(CreateView):
             api_key = "ge-ea5a9c6688e4ac48"  # Replace with your actual API key
             form.instance.address = get_address_from_coordinates(form.instance.latitude, form.instance.longitude, api_key)
         return super().form_valid(form)
+    
+def toggle_save(request, event_id):
+    if request.method == 'POST':
+        event = get_object_or_404(EventReminder, pk=event_id)
+        event.is_saved = not event.is_saved  # Toggle the is_saved state
+        event.save()
+        return JsonResponse({'success': True, 'is_saved': event.is_saved})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
 class ReminderUpdateView(UpdateView):
     model = EventReminder
