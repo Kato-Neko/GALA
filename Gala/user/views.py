@@ -18,6 +18,7 @@ from eventcalendar.models import EventReminder
 from recommendation.models import Location
 from datetime import datetime, timedelta
 from math import radians, sin, cos, sqrt, atan2
+from recommendation.utils import get_weather_data
 
 import json
 
@@ -149,7 +150,7 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     R = 6371  # Radius of Earth in km
     dlat = radians(lat2 - lat1)
     dlon = radians(lon2 - lon1)
-    a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+    a = sin(dlat / 2) * 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) * 2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return R * c * 1000  # Convert to meters
 
@@ -157,22 +158,13 @@ def home(request):
     reminders = EventReminder.objects.all()
     locations = Location.objects.all()
 
-    search_query = request.GET.get('q', '').strip()  # 'q' is the query parameter for the search
-
-    # Filter reminders and locations by the search query
-    if search_query:
-        reminders = reminders.filter(description__icontains=search_query)
-        locations = locations.filter(name__icontains=search_query)
-
     # Retrieve user's current location from the session
     user_latitude = request.session.get('user_latitude')
     user_longitude = request.session.get('user_longitude')
 
-    now = datetime.now()
-    combined_list = []  # For reminders/locations within 5km
-    all_pins = []       # For all reminders/locations (no distance restriction)
+    combined_list = []
 
-    # Process reminders
+    # Add reminders to the combined list
     for reminder in reminders:
         print(f"Reminder ID: {reminder.event_reminder_id}")  # Check if this ID exists
 
@@ -186,6 +178,7 @@ def home(request):
                 float(reminder.latitude), float(reminder.longitude)
             )
 
+<<<<<<< HEAD
         # Determine reminder status
         reminder_start_datetime = datetime.combine(reminder.date, reminder.start_time)
         reminder_end_datetime = (
@@ -232,6 +225,9 @@ def home(request):
 
                 formatted_time_remaining = ", ".join(time_display) + " to go"
 
+=======
+        if distance is not None and distance <= 5000:  # 5 km in meters
+>>>>>>> a7b35b3002f09dcbee197ac086f9647c8bc92365
             combined_list.append({
                 'type': 'reminder',
                 'event_reminder_id': reminder.event_reminder_id,  # Ensure this is added
@@ -239,64 +235,49 @@ def home(request):
                 'title': reminder.description,
                 'start': f"{reminder.date.strftime('%B %d, %Y')} {start_time}",
                 'end': f"{reminder.date.strftime('%B %d, %Y')} {end_time}" if end_time else None,
-                'latitude': reminder.latitude,
-                'longitude': reminder.longitude,
+                'longitude': reminder.longitude if reminder.longitude is not None else "",
+                'latitude': reminder.latitude if reminder.latitude is not None else "",
                 'address': reminder.address,
-                'image': reminder.image.url if reminder.image else "",
-                'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
-                'time_remaining': formatted_time_remaining,
-                'is_happening': is_happening,
+                'image': reminder.image.url if reminder.image else "",  # Include image URL
+                'distance_value': distance,  # Add raw distance for sorting
+                'distance': f"{distance / 1000:.2f} km",  # Convert to km for display
             })
 
-    # Sort reminders by time first, then by distance
-    combined_list.sort(key=lambda x: ('Happening Now' not in x['time_remaining'], x['time_remaining'], x['distance']))
-
-    # Process locations
+    # Add locations to the combined list
     for location in locations:
-        if location.latitude is not None and location.longitude is not None:
-            distance = None
-            if user_latitude and user_longitude:
-                distance = calculate_distance(
-                    float(user_latitude), float(user_longitude),
-                    float(location.latitude), float(location.longitude)
-                )
+        distance = None
+        weather = None  # Initialize weather variable
+        if user_latitude and user_longitude and location.latitude and location.longitude:
+            distance = calculate_distance(
+                float(user_latitude), float(user_longitude),
+                float(location.latitude), float(location.longitude)
+            )
+            # Fetch dynamic weather data
+            weather = get_weather_data(
+                location.latitude, location.longitude, "7334d2a0bf94493b8b894516240812"
+            )
 
-            # Add to all_pins (for map display)
-            all_pins.append({
+        if distance is not None and distance <= 5000:  # 5 km in meters
+            combined_list.append({
                 'type': 'location',
                 'name': location.name,
                 'description': location.description,
-                'latitude': location.latitude,
                 'longitude': location.longitude,
+                'latitude': location.latitude,
                 'address': location.address,
-                'image': location.image.url if location.image else "",
-                'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
-                'weather': location.weather,
-                'is_within_5km': distance and distance <= 5000  # Add this flag
+                'weather': weather,  # Add dynamically fetched weather data
+                'distance_value': distance,  # Add raw distance for sorting
+                'distance': f"{distance / 1000:.2f} km",  # Convert to km for display
             })
 
-            # Include only locations within 5km in combined_list
-            if distance and distance <= 5000:
-                combined_list.append({
-                    'type': 'location',
-                    'name': location.name,
-                    'description': location.description,
-                    'latitude': location.latitude,
-                    'longitude': location.longitude,
-                    'address': location.address,
-                    'image': location.image.url if location.image else "",
-                    'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
-                    'weather': location.weather,
-                })
+    # Sort the combined list by distance
+    combined_list.sort(key=lambda x: x['distance_value'])
 
-    # Serialize the combined lists for the template
     combined_list_json = json.dumps(combined_list, cls=DjangoJSONEncoder)
-    all_pins_json = json.dumps(all_pins, cls=DjangoJSONEncoder)
 
     return render(request, 'home.html', {
         'combined_list': combined_list,
         'combined_list_json': combined_list_json,
-        'all_pins_json': all_pins_json,
     })
 
 def search(request):
@@ -357,6 +338,7 @@ def search(request):
                 'url': f"/location/{location.id}",  # Adjust the URL as needed
             })
 
+<<<<<<< HEAD
     return JsonResponse(results, safe=False)
 
 @csrf_exempt
@@ -367,3 +349,6 @@ def toggle_save(request, event_id):
         event.save()
         return JsonResponse({'success': True, 'is_saved': event.is_saved})
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
+=======
+    return JsonResponse(results, safe=False)
+>>>>>>> a7b35b3002f09dcbee197ac086f9647c8bc92365
