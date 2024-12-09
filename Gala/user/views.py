@@ -178,7 +178,6 @@ def home(request):
                 float(reminder.latitude), float(reminder.longitude)
             )
 
-<<<<<<< HEAD
         # Determine reminder status
         reminder_start_datetime = datetime.combine(reminder.date, reminder.start_time)
         reminder_end_datetime = (
@@ -225,9 +224,6 @@ def home(request):
 
                 formatted_time_remaining = ", ".join(time_display) + " to go"
 
-=======
-        if distance is not None and distance <= 5000:  # 5 km in meters
->>>>>>> a7b35b3002f09dcbee197ac086f9647c8bc92365
             combined_list.append({
                 'type': 'reminder',
                 'event_reminder_id': reminder.event_reminder_id,  # Ensure this is added
@@ -338,7 +334,6 @@ def search(request):
                 'url': f"/location/{location.id}",  # Adjust the URL as needed
             })
 
-<<<<<<< HEAD
     return JsonResponse(results, safe=False)
 
 @csrf_exempt
@@ -349,6 +344,3 @@ def toggle_save(request, event_id):
         event.save()
         return JsonResponse({'success': True, 'is_saved': event.is_saved})
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
-=======
-    return JsonResponse(results, safe=False)
->>>>>>> a7b35b3002f09dcbee197ac086f9647c8bc92365
