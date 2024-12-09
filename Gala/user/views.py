@@ -8,6 +8,8 @@ from django.contrib import messages
 from django.core.serializers.json import DjangoJSONEncoder
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.http import JsonResponse
+from django.db.models import Q
 from user.models import Profile
 from django import forms
 
@@ -154,6 +156,13 @@ def home(request):
     reminders = EventReminder.objects.all()
     locations = Location.objects.all()
 
+    search_query = request.GET.get('q', '').strip()  # 'q' is the query parameter for the search
+
+    # Filter reminders and locations by the search query
+    if search_query:
+        reminders = reminders.filter(description__icontains=search_query)
+        locations = locations.filter(name__icontains=search_query)
+
     # Retrieve user's current location from the session
     user_latitude = request.session.get('user_latitude')
     user_longitude = request.session.get('user_longitude')
@@ -256,6 +265,7 @@ def home(request):
                 'image': location.image.url if location.image else "",
                 'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
                 'weather': location.weather,
+                'is_within_5km': distance and distance <= 5000  # Add this flag
             })
 
             # Include only locations within 5km in combined_list
@@ -281,3 +291,63 @@ def home(request):
         'combined_list_json': combined_list_json,
         'all_pins_json': all_pins_json,
     })
+
+def search(request):
+    query = request.GET.get('q', '').strip()
+    results = []
+
+    # Get user's current location from the session
+    user_latitude = request.session.get('user_latitude')
+    user_longitude = request.session.get('user_longitude')
+
+    if query:
+        now = datetime.now()
+
+        # Search in EventReminder and exclude missed reminders
+        reminders = EventReminder.objects.filter(
+            description__icontains=query
+        ).exclude(
+            end_time__isnull=False,
+            end_time__lt=now
+        )
+
+        # Search in Location models
+        locations = Location.objects.filter(name__icontains=query)
+
+        # Add reminders to results
+        for reminder in reminders:
+            distance = None
+            if user_latitude and user_longitude and reminder.latitude and reminder.longitude:
+                distance = calculate_distance(
+                    float(user_latitude), float(user_longitude),
+                    float(reminder.latitude), float(reminder.longitude)
+                )
+            
+            results.append({
+                'title': reminder.description,
+                'latitude': reminder.latitude,
+                'longitude': reminder.longitude,
+                'address': reminder.address,
+                'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
+                'url': f"/reminder/{reminder.event_reminder_id}",  # Adjust the URL as needed
+            })
+
+        # Add locations to results
+        for location in locations:
+            distance = None
+            if user_latitude and user_longitude and location.latitude and location.longitude:
+                distance = calculate_distance(
+                    float(user_latitude), float(user_longitude),
+                    float(location.latitude), float(location.longitude)
+                )
+            
+            results.append({
+                'title': location.name,
+                'latitude': location.latitude,
+                'longitude': location.longitude,
+                'address': location.address,
+                'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
+                'url': f"/location/{location.id}",  # Adjust the URL as needed
+            })
+
+    return JsonResponse(results, safe=False)

@@ -46,9 +46,21 @@
             <div class="lobster-two-bold text-5xl text-white ">GALA</div>
 
             <div class="form-control flex-grow max-w-[920px] mx-auto">
-                <input type="text" placeholder="Search" class="input input-bordered w-full" />
-            </div>
+                {% if request.path == '/' %}
+                <input id="searchInput" type="text" name="q" placeholder="Search" class="input input-bordered w-full"
+                    autocomplete="off" oninput="handleSearch(this.value)">
 
+                <!-- Dropdown container -->
+                <div id="searchResultsDropdown"
+                    class="absolute z-10 hidden divide-y divide-gray-100 rounded-lg shadow w-[720px] bg-[rgba(186,190,247,0.8)] dark:bg-[rgba(3,2,84,0.6)]"
+                    style="top: 7rem;
+                    backdrop-filter: blur(20px);">
+                    <ul id="searchResultsList" class="py-2 text-sm text-gray-700 dark:text-gray-200">
+                        <!-- Dynamic search results will appear here -->
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
 
             <!-- User Info (Profile Picture and Username, pushed to the right) -->
             <div class="flex items-center h-full gap-2 text-white">
@@ -182,6 +194,7 @@
             document.getElementById("signupForm").classList.add("hidden");
             document.getElementById("loginForm").classList.remove("hidden");
         }
+
     </script>
 </body>
 

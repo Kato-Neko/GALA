@@ -107,67 +107,74 @@
                 popupAnchor: [0, -50],
             });
 
+            // Adjust opacity based on the distance
+            const markerOpacity = is_within_5km ? 1 : 0.5; // Fully visible within 5km, transparent otherwise
+
             const bgColor = type === 'reminder'
                 ? (is_happening ? 'rgba(40, 167, 69, 0.8)' : 'rgba(0, 56, 109, 0.8)') // Green for happening, blue otherwise
                 : 'rgba(197, 48, 48, 0.8)'; // Red for locations
 
-            // Adjust opacity based on the distance
-            const markerOpacity = is_happening && is_within_5km ? 1 : (is_within_5km ? 1 : 0.5);
-
             let popupContent = `
-        <div style="
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: start;
-            padding: 30px; 
-            height: auto !important;  
-            width: 400px; 
-            border-radius: 10px; 
-            background-color: ${bgColor}; 
-            color: white; 
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);">
-            ${image ? `
-                <img src="${image}" alt="Image" 
-                    style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 10px;" />
-            ` : ''}                    
-            <h3 style="margin: 0; font-size: 1.5em; font-weight: bold; text-align: center;">
-                ${type === 'reminder' ? title : name}
-            </h3>
-            <p style="margin: 5px 0; font-size: 1em; text-align: center;">${address || 'Address not available'}</p>
-        `;
+                <div style="
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: start;
+                    padding: 30px; 
+                    height: auto !important;  
+                    width: 400px; 
+                    border-radius: 10px; 
+                    background-color: ${bgColor}; 
+                    color: white; 
+                    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);">
+                    
+                    ${image ? `
+                        <img src="${image}" alt="Image" 
+                            style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 10px;" />
+                    ` : ''}                    
 
-            if (type === 'reminder') {
-                popupContent += `
-            <span class="inline-block px-3 py-1 text-xs font-medium text-white rounded ${is_happening ? 'bg-green-700' : 'bg-blue-900'}">
-                Reminder
-            </span>
-            <p><strong>Start:</strong> ${start}</p>
-            ${end ? `<p><strong>End:</strong> ${end}</p>` : ''}
-        `;
-            } else if (type === 'location') {
-                popupContent += `
-            <span class="inline-block px-3 py-1 text-xs font-medium text-white rounded bg-red-800">
-                Location
-            </span>
-            <p><strong>Description:</strong> ${description}</p>
-            ${weather ? `<p><strong>Weather:</strong> ${weather}</p>` : ''}
-        `;
-            }
+                    <h3 style="margin: 0; font-size: 1.5em; font-weight: bold; text-align: center;">
+                        ${type === 'reminder' ? title : name}
+                    </h3>
 
-            popupContent += `
-        <p><strong>Distance:</strong> ${distance}</p>
-    </div>
-    `;
+                    ${type === 'reminder' ? `
+                    <div style="margin-top: 15px;">
+                        <p style="margin: 5px 0; font-size: 1em;">
+                            <strong>Start:</strong> ${start}
+                        </p>
+                        <p style="margin: 15px 0; font-size: 1em;">
+                            <strong>End:</strong> ${end || 'N/A'}
+                        </p>
+                    </div>
+                    ` : `
+                    <div style="margin-top: 15px;">
+                        <p style="margin: 5px 0; font-size: 1em;">
+                            ${description || 'No description available'}
+                        </p>
+                    </div>
+                    `}
+
+                    <div style="margin-top: 20x;">
+                        <p style="margin-top: 20px; font-size: 1em;">
+                            <strong>${address || 'Address not available'}</strong>
+                        </p>
+                        <p style="margin-bottom: 5px; font-size: 1em;">
+                            <strong>${distance} away</strong>
+                        </p>
+                    </div>
+                </div>
+            `;
+
 
             const marker = L.marker([latitude, longitude], {
                 icon: customIcon,
-                opacity: markerOpacity // Use adjusted opacity
+                opacity: markerOpacity // Use updated opacity
             }).bindPopup(popupContent, { className: 'custom-popup' });
 
             // Add the marker to the feature group
             marker.addTo(allMarkers);
         });
+
 
 
         // Add all markers to the map
@@ -244,6 +251,102 @@
         document.addEventListener('DOMContentLoaded', () => {
             getUserLocation();
         });
+
+        async function handleSearch(query) {
+            const dropdown = document.getElementById('searchResultsDropdown');
+            const resultsList = document.getElementById('searchResultsList');
+
+            if (query.trim() === "") {
+                dropdown.classList.add('hidden'); // Hide the dropdown if the input is empty
+                return;
+            }
+
+            // Fetch search results from the server
+            const response = await fetch(`/search?q=${query}`);
+            const results = await response.json();
+
+            // Clear existing results
+            resultsList.innerHTML = '';
+
+            if (results.length > 0) {
+                // Populate the dropdown with results
+                results.forEach(result => {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('px-4', 'py-2', 'hover:bg-[rgba(3,2,84,0.4)]', 'dark:hover:bg-[rgba(3,2,84,0.4)]', 'dark:hover:text-white');
+                    listItem.innerHTML = `
+                <div class="block cursor-pointer">
+                    <div class="font-semibold text-black dark:text-white">${result.title}</div>
+                    <div class="text-sm text-black dark:text-gray-300">${result.address || 'No address available'}</div>
+                    <div class="text-xs text-black dark:text-gray-300">${result.distance || 'Distance unknown'}</div>
+                </div>
+            `;
+
+                    // Add click event listener
+                    listItem.addEventListener('click', (event) => {
+                        event.preventDefault(); // Prevent default action
+                        zoomToLocation(result); // Trigger zoom on click
+                        dropdown.classList.add('hidden'); // Hide dropdown after clicking
+                    });
+
+                    resultsList.appendChild(listItem);
+                });
+
+                dropdown.classList.remove('hidden'); // Show the dropdown
+            } else {
+                // Show a "no results" message
+                resultsList.innerHTML = `
+            <li class="block px-4 py-2 text-gray-500 dark:text-gray-400">No results found</li>
+        `;
+                dropdown.classList.remove('hidden'); // Show the dropdown
+            }
+        }
+
+        // Function to zoom in on a location
+        function zoomToLocation(location) {
+            const { latitude, longitude } = location;
+
+            if (latitude && longitude) {
+                // Find the marker associated with the location
+                const marker = allMarkers.getLayers().find(m =>
+                    m.getLatLng().lat === latitude && m.getLatLng().lng === longitude
+                );
+
+                if (marker) {
+                    // Zoom to the marker and open its popup
+                    map.setView([latitude, longitude], 18);
+                    marker.openPopup();
+                    map.panBy([0, -300]);
+                } else {
+                    console.error('Marker not found for the selected location.');
+                }
+            } else {
+                console.error('Location coordinates are missing.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Select all map buttons
+            const mapButtons = document.querySelectorAll('.map-icon');
+
+            // Attach click event listener to each button
+            mapButtons.forEach((button) => {
+                button.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevent parent click event from triggering
+
+                    // Get latitude and longitude from data attributes
+                    const latitude = parseFloat(button.getAttribute('data-latitude'));
+                    const longitude = parseFloat(button.getAttribute('data-longitude'));
+
+                    if (!isNaN(latitude) && !isNaN(longitude)) {
+                        // Call the zoomToLocation function with the coordinates
+                        zoomToLocation({ latitude, longitude });
+                    } else {
+                        console.error('Invalid latitude or longitude.');
+                    }
+                });
+            });
+        });
+
 
     </script>
 
