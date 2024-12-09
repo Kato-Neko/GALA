@@ -24,7 +24,7 @@
                     {% if reminder.is_happening %}
                     <p class="text-white font-bold">Happening Now</p>
                     {% elif reminder.is_overdue %}
-                    <p class="text-white font-bold">Missed</p>
+                    <p class="text-red-500 font-bold">Missed</p>
                     {% else %}
                     <p>Time Remaining: {{ reminder.time_remaining }}</p>
                     {% endif %}

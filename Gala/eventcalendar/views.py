@@ -159,7 +159,7 @@ class ReminderListView(ListView):
                 "is_happening": is_happening,
                 "color": (
                     "#28a745" if is_happening else 
-                    "#b70000" if is_missed else  
+                    "#1b2024" if is_missed else  
                     "#00386d" 
                 ),
             }
@@ -177,7 +177,7 @@ class ReminderListView(ListView):
                 "end": f"{reminder.date}T{reminder.end_time}" if reminder.end_time else None,
                 "color": (
                     "#28a745" if is_happening else  # Green for happening
-                    "#b70000" if is_missed else  # Red for missed
+                    "#1b2024" if is_missed else  # Red for missed
                     "#00386d"  # Default blue for upcoming
                 ),
                 "textColor": "#ffffff",
