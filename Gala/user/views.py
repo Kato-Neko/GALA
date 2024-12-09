@@ -8,15 +8,16 @@ from django.contrib import messages
 from django.core.serializers.json import DjangoJSONEncoder
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.http import JsonResponse
+from django.db.models import Q
 from user.models import Profile
 from django import forms
 
 from eventcalendar.models import EventReminder
 from recommendation.models import Location
+from datetime import datetime, timedelta
 from math import radians, sin, cos, sqrt, atan2
-
 from recommendation.utils import get_weather_data
-
 
 import json
 
@@ -148,7 +149,7 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     R = 6371  # Radius of Earth in km
     dlat = radians(lat2 - lat1)
     dlon = radians(lon2 - lon1)
-    a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+    a = sin(dlat / 2) * 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) * 2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return R * c * 1000  # Convert to meters
 
@@ -224,3 +225,63 @@ def home(request):
         'combined_list': combined_list,
         'combined_list_json': combined_list_json,
     })
+
+def search(request):
+    query = request.GET.get('q', '').strip()
+    results = []
+
+    # Get user's current location from the session
+    user_latitude = request.session.get('user_latitude')
+    user_longitude = request.session.get('user_longitude')
+
+    if query:
+        now = datetime.now()
+
+        # Search in EventReminder and exclude missed reminders
+        reminders = EventReminder.objects.filter(
+            description__icontains=query
+        ).exclude(
+            end_time__isnull=False,
+            end_time__lt=now
+        )
+
+        # Search in Location models
+        locations = Location.objects.filter(name__icontains=query)
+
+        # Add reminders to results
+        for reminder in reminders:
+            distance = None
+            if user_latitude and user_longitude and reminder.latitude and reminder.longitude:
+                distance = calculate_distance(
+                    float(user_latitude), float(user_longitude),
+                    float(reminder.latitude), float(reminder.longitude)
+                )
+            
+            results.append({
+                'title': reminder.description,
+                'latitude': reminder.latitude,
+                'longitude': reminder.longitude,
+                'address': reminder.address,
+                'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
+                'url': f"/reminder/{reminder.event_reminder_id}",  # Adjust the URL as needed
+            })
+
+        # Add locations to results
+        for location in locations:
+            distance = None
+            if user_latitude and user_longitude and location.latitude and location.longitude:
+                distance = calculate_distance(
+                    float(user_latitude), float(user_longitude),
+                    float(location.latitude), float(location.longitude)
+                )
+            
+            results.append({
+                'title': location.name,
+                'latitude': location.latitude,
+                'longitude': location.longitude,
+                'address': location.address,
+                'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
+                'url': f"/location/{location.id}",  # Adjust the URL as needed
+            })
+
+    return JsonResponse(results, safe=False)
