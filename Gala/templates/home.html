@@ -8,14 +8,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GALA</title>
     <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/x-icon">
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* Ensure the map covers the entire screen */
         html,
         body {
             height: 100%;
@@ -50,19 +47,15 @@
 </head>
 
 <body>
-    <!-- Map Container -->
     <div id="map"></div>
 
-    <!-- Include Modals -->
-    {% include 'suggestions.html' %}
+    {% include 'suggestions.php' %}
     {% include 'menu.html' %}
 
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         var map = L.map('map').setView([10.31, 123.8754], 10);
 
-        // Add tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap contributors'
@@ -70,10 +63,8 @@
 
         var allPins = JSON.parse('{{ all_pins_json|escapejs }}');
 
-        // Create a feature group to hold all markers
         var allMarkers = L.featureGroup();
 
-        // Add markers for reminders and locations
         allPins.forEach(item => {
             const {
                 latitude,
@@ -92,7 +83,6 @@
                 is_within_5km
             } = item;
 
-            // Determine the icon URL based on the event type and status
             const iconUrl = type === 'reminder'
                 ? (is_happening ? "{% static 'images/favicon_green.png' %}" : "{% static 'images/favicon.png' %}")
                 : "{% static 'images/favicon_red.png' %}";
@@ -106,13 +96,11 @@
                 shadowAnchor: [15, 50],
                 popupAnchor: [0, -50],
             });
-
-            // Adjust opacity based on the distance
-            const markerOpacity = is_within_5km ? 1 : 0.5; // Fully visible within 5km, transparent otherwise
+            const markerOpacity = is_within_5km ? 1 : 0.5;
 
             const bgColor = type === 'reminder'
-                ? (is_happening ? 'rgba(40, 167, 69, 0.8)' : 'rgba(0, 56, 109, 0.8)') // Green for happening, blue otherwise
-                : 'rgba(197, 48, 48, 0.8)'; // Red for locations
+                ? (is_happening ? 'rgba(40, 167, 69, 0.8)' : 'rgba(0, 56, 109, 0.8)')
+                : 'rgba(197, 48, 48, 0.8)';
 
             let popupContent = `
                 <div style="
@@ -163,7 +151,7 @@
                         </p>
                     </div>
 
-                    <div style="margin-top: 20px; display: flex; justify-content: flex-end; width: 100%;">
+                    <!--<div style="margin-top: 20px; display: flex; justify-content: flex-end; width: 100%;">
                         <button
                         style="
                             background: none; 
@@ -178,23 +166,21 @@
                                     d="m19 21-7-4-7 4V3.889a.92.92 0 0 1 .244-.629.808.808 0 0 1 .59-.26h12.333a.81.81 0 0 1 .589.26.92.92 0 0 1 .244.63V21Z" />
                             </svg>
                         </button>
-                    </div>
+                    </div>-->
                 </div>
             `;
 
 
             const marker = L.marker([latitude, longitude], {
                 icon: customIcon,
-                opacity: markerOpacity // Use updated opacity
+                opacity: markerOpacity
             }).bindPopup(popupContent, { className: 'custom-popup' });
 
-            // Add the marker to the feature group
             marker.addTo(allMarkers);
         });
 
 
 
-        // Add all markers to the map
         allMarkers.addTo(map);
 
         function getUserLocation() {
@@ -204,10 +190,9 @@
                         const userLatitude = position.coords.latitude;
                         const userLongitude = position.coords.longitude;
 
-                        // Set the zoom level and center the map around the user's location
-                        map.setView([userLatitude, userLongitude], 13); // Adjust the zoom level as needed
 
-                        // Add the 7km radius circle to the map
+                        map.setView([userLatitude, userLongitude], 13);
+
                         const radiusInMeters = 5000;
                         const userLocationCircle = L.circle([userLatitude, userLongitude], {
                             fillColor: 'yellow',
@@ -218,7 +203,6 @@
                             radius: radiusInMeters,
                         }).addTo(map);
 
-                        // Add a small marker to indicate the exact user's location
                         const userExactLocationCircle = L.circleMarker([userLatitude, userLongitude], {
                             fillColor: 'white',
                             fillOpacity: 0.7,
@@ -264,7 +248,6 @@
             }
         }
 
-        // Call getUserLocation and set bounds to the feature group after the user's location is fetched
         document.addEventListener('DOMContentLoaded', () => {
             getUserLocation();
         });
@@ -274,19 +257,16 @@
             const resultsList = document.getElementById('searchResultsList');
 
             if (query.trim() === "") {
-                dropdown.classList.add('hidden'); // Hide the dropdown if the input is empty
+                dropdown.classList.add('hidden');
                 return;
             }
 
-            // Fetch search results from the server
             const response = await fetch(`/search?q=${query}`);
             const results = await response.json();
 
-            // Clear existing results
             resultsList.innerHTML = '';
 
             if (results.length > 0) {
-                // Populate the dropdown with results
                 results.forEach(result => {
                     const listItem = document.createElement('li');
                     listItem.classList.add('px-4', 'py-2', 'hover:bg-[rgba(3,2,84,0.4)]', 'dark:hover:bg-[rgba(3,2,84,0.4)]', 'dark:hover:text-white');
@@ -298,38 +278,33 @@
                 </div>
             `;
 
-                    // Add click event listener
                     listItem.addEventListener('click', (event) => {
-                        event.preventDefault(); // Prevent default action
-                        zoomToLocation(result); // Trigger zoom on click
-                        dropdown.classList.add('hidden'); // Hide dropdown after clicking
+                        event.preventDefault();
+                        zoomToLocation(result);
+                        dropdown.classList.add('hidden');
                     });
 
                     resultsList.appendChild(listItem);
                 });
 
-                dropdown.classList.remove('hidden'); // Show the dropdown
+                dropdown.classList.remove('hidden');
             } else {
-                // Show a "no results" message
                 resultsList.innerHTML = `
             <li class="block px-4 py-2 text-gray-500 dark:text-gray-400">No results found</li>
         `;
-                dropdown.classList.remove('hidden'); // Show the dropdown
+                dropdown.classList.remove('hidden');
             }
         }
 
-        // Function to zoom in on a location
         function zoomToLocation(location) {
             const { latitude, longitude } = location;
 
             if (latitude && longitude) {
-                // Find the marker associated with the location
                 const marker = allMarkers.getLayers().find(m =>
                     m.getLatLng().lat === latitude && m.getLatLng().lng === longitude
                 );
 
                 if (marker) {
-                    // Zoom to the marker and open its popup
                     map.setView([latitude, longitude], 18);
                     marker.openPopup();
                     map.panBy([0, -300]);
@@ -342,20 +317,16 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Select all map buttons
             const mapButtons = document.querySelectorAll('.map-icon');
 
-            // Attach click event listener to each button
             mapButtons.forEach((button) => {
                 button.addEventListener('click', (event) => {
-                    event.stopPropagation(); // Prevent parent click event from triggering
+                    event.stopPropagation();
 
-                    // Get latitude and longitude from data attributes
                     const latitude = parseFloat(button.getAttribute('data-latitude'));
                     const longitude = parseFloat(button.getAttribute('data-longitude'));
 
                     if (!isNaN(latitude) && !isNaN(longitude)) {
-                        // Call the zoomToLocation function with the coordinates
                         zoomToLocation({ latitude, longitude });
                     } else {
                         console.error('Invalid latitude or longitude.');
@@ -364,6 +335,51 @@
             });
         });
 
+        function toggleSave(objectId, objectType, button) {
+            console.log('toggleSave called with:', { objectId, objectType });
+
+            if (!objectId || !objectType) {
+                console.error('Invalid object ID or type:', objectId, objectType);
+                return;
+            }
+
+            fetch(`/toggle-save/${objectType}/${objectId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log('Server response:', data);
+                    if (data.success) {
+                        const isSaved = data.is_saved;
+                        console.log('Save toggled, new state:', isSaved);
+
+                        const parent = button.closest('.suggestion-item');
+                        const computedStyle = window.getComputedStyle(parent);
+                        const dynamicColor = computedStyle.backgroundColor;
+
+                        const savedSVG = button.querySelector('.saved-svg path');
+                        const unsavedSVG = button.querySelector('.unsaved-svg path');
+
+                        if (isSaved) {
+                            button.querySelector('.saved-svg').classList.remove('hidden');
+                            button.querySelector('.unsaved-svg').classList.add('hidden');
+                            savedSVG.setAttribute('fill', dynamicColor);
+                        } else {
+                            button.querySelector('.saved-svg').classList.add('hidden');
+                            button.querySelector('.unsaved-svg').classList.remove('hidden');
+                            unsavedSVG.setAttribute('stroke', dynamicColor);
+                            unsavedSVG.setAttribute('fill', 'none');
+                        }
+                    } else {
+                        console.error('Error toggling save state:', data.error);
+                    }
+                })
+                .catch((error) => console.error('Error:', error));
+        }
     </script>
 
 </body>

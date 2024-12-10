@@ -8,6 +8,7 @@ class Location(models.Model):
     image = models.ImageField(upload_to='location_images/', blank=True, null=True)
     address = models.CharField(max_length=500, blank=True, null=True)
     weather = models.TextField(max_length=500, blank=True, null=True)
+    is_saved = models.BooleanField(default=False) 
 
     class Meta:
         indexes = [

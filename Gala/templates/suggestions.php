@@ -6,92 +6,47 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GALA</title>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#00386d',
-                        dark: '#b70000',
-                        light: '#EAF4FA',
-                        green: '#28a745', // Add custom green color if necessary
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    primary: '#00386d',
+                    dark: '#b70000',
+                    light: '#EAF4FA',
+                    green: '#28a745',
 
-                    },
-                    backgroundImage: {
-                        'gradient-dark': 'linear-gradient(to bottom right, #00386d, #005082)',
-                    },
+                },
+                backgroundImage: {
+                    'gradient-dark': 'linear-gradient(to bottom right, #00386d, #005082)',
                 },
             },
-        };
+        },
+    };
 
-        function toggleSuggestionItem(item) {
-            const isActive = item.getAttribute("data-active") === "true";
+    function toggleSuggestionItem(item) {
+        const isActive = item.getAttribute("data-active") === "true";
 
-            document.querySelectorAll('.suggestion-item').forEach((el) => {
-                el.classList.remove("active");
-                el.setAttribute("data-active", "false");
-                el.querySelector(".suggestion-item-extra").classList.add("hidden");
-            });
+        document.querySelectorAll('.suggestion-item').forEach((el) => {
+            el.classList.remove("active");
+            el.setAttribute("data-active", "false");
+            el.querySelector(".suggestion-item-extra").classList.add("hidden");
+        });
 
-            if (!isActive) {
-                item.classList.add("active");
-                item.setAttribute("data-active", "true");
-                const extraContent = item.querySelector(".suggestion-item-extra");
-                if (extraContent) {
-                    extraContent.classList.remove("hidden");
-                }
+        if (!isActive) {
+            item.classList.add("active");
+            item.setAttribute("data-active", "true");
+            const extraContent = item.querySelector(".suggestion-item-extra");
+            if (extraContent) {
+                extraContent.classList.remove("hidden");
             }
         }
-
-        function toggleSave(eventId, button) {
-            if (!eventId) {
-                console.error('Invalid event ID:', eventId);
-                return;
-            }
-
-            fetch(`/toggle-save/${eventId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data.success) {
-                        const isSaved = data.is_saved;
-
-                        // Get the dynamic color from the parent element
-                        const parent = button.closest('.suggestion-item');
-                        const computedStyle = window.getComputedStyle(parent);
-                        const dynamicColor = computedStyle.backgroundColor;
-
-                        // Toggle visibility and set colors dynamically
-                        const savedSVG = button.querySelector('.saved-svg path');
-                        const unsavedSVG = button.querySelector('.unsaved-svg path');
-
-                        if (isSaved) {
-                            button.querySelector('.saved-svg').classList.remove('hidden');
-                            button.querySelector('.unsaved-svg').classList.add('hidden');
-                            savedSVG.setAttribute('fill', dynamicColor);
-                        } else {
-                            button.querySelector('.saved-svg').classList.add('hidden');
-                            button.querySelector('.unsaved-svg').classList.remove('hidden');
-                            unsavedSVG.setAttribute('stroke', dynamicColor);
-                            unsavedSVG.setAttribute('fill', 'none'); // Ensure no fill on unsaved
-                        }
-                    } else {
-                        console.error('Error toggling save state:', data.error);
-                    }
-                })
-                .catch((error) => console.error('Error:', error));
-        }
-
+    }
     </script>
 
     <link rel="stylesheet" href="{% static 'css/suggestions.css' %}">
@@ -125,6 +80,7 @@
                     {% else %}
                     {{ item.name }}
                     {% endif %}
+
                 </h4>
 
                 {% if item.type == "reminder" %}
@@ -136,6 +92,7 @@
                 {% else %}
                 <p class="font-semibold text-sm">{{ item.time_remaining }}</p>
                 {% endif %}
+
                 {% elif item.type == "location" %}
 
                 <p class="font-semibold text-sm"> {{ item.distance }} away</p>
@@ -158,10 +115,9 @@
                             </svg>
                         </button>
 
-                        <!-- Save Button -->
-                        <button onclick="toggleSave({{ item.event_reminder_id|default:'null' }}, this)"
+                        <button onclick="toggleSave({{ item.id|default:'null' }}, '{{ item.type|default:'' }}', this)"
                             class="save-button">
-                            <!-- Saved SVG -->
+
                             <svg class="saved-svg {% if not item.is_saved %}hidden{% endif %}"
                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                 <path
@@ -169,16 +125,15 @@
                                     fill="currentColor" />
                             </svg>
 
-                            <!-- Unsaved SVG -->
+
                             <svg class="unsaved-svg {% if item.is_saved %}hidden{% endif %}"
                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                 <path
                                     d="m17 21-5-4-5 4V3.889a.92.92 0 0 1 .244-.629.808.808 0 0 1 .59-.26h8.333a.81.81 0 0 1 .589.26.92.92 0 0 1 .244.63V21Z"
                                     fill="none" stroke="currentColor" stroke-width="2" />
                             </svg>
-
-
                         </button>
+
                     </div>
                 </div>
             </div>

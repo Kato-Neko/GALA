@@ -22,10 +22,10 @@
             <a href="#" class="menu-item">
                 <img src="{% static 'icons/search.png' %}" alt="Search" class="icon">
             </a>
-            <div class="menu-item"> <!-- Changed from <a> to <div> -->
+            <div class="menu-item">
                 <img src="{% static 'icons/settings.png' %}" alt="Settings" class="icon">
                 <div class="dropdown">
-                    
+
                 </div>
             </div>
         </div>
@@ -35,15 +35,14 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const settingsMenu = document.querySelector('.menu-item:last-child'); // Select the last menu item
+        const settingsMenu = document.querySelector('.menu-item:last-child');
         const dropdown = settingsMenu.querySelector('.dropdown');
 
         settingsMenu.addEventListener('click', function (event) {
-            event.stopPropagation(); // Prevent event bubbling
+            event.stopPropagation();
             dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
         });
 
-        // Hide dropdown if clicking outside
         document.addEventListener('click', function () {
             dropdown.style.display = 'none';
         });

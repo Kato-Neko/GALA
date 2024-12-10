@@ -10,7 +10,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GALA</title>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -38,11 +37,9 @@
 
 <body class="menu-page" data-user-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
 
-    <!-- Top Navbar -->
     <div class="navbar">
         <div class="flex items-center space-x-4 w-full pl-40 pr-40 justify-between">
 
-            <!-- GALA Title -->
             <div class="lobster-two-bold text-5xl text-white ">GALA</div>
 
             <div class="form-control flex-grow max-w-[920px] mx-auto">
@@ -50,25 +47,21 @@
                 <input id="searchInput" type="text" name="q" placeholder="Search" class="input input-bordered w-full"
                     autocomplete="off" oninput="handleSearch(this.value)">
 
-                <!-- Dropdown container -->
                 <div id="searchResultsDropdown"
                     class="absolute z-10 hidden divide-y divide-gray-100 rounded-lg shadow w-[720px] bg-[rgba(186,190,247,0.8)] dark:bg-[rgba(3,2,84,0.6)]"
                     style="top: 7rem;
                     backdrop-filter: blur(20px);">
                     <ul id="searchResultsList" class="py-2 text-sm text-gray-700 dark:text-gray-200">
-                        <!-- Dynamic search results will appear here -->
+
                     </ul>
                 </div>
                 {% endif %}
             </div>
 
-            <!-- User Info (Profile Picture and Username, pushed to the right) -->
             <div class="flex items-center h-full gap-2 text-white">
-                <!-- Profile container -->
                 <div
                     class="avatar w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-1 border-white flex items-center justify-center">
                     {% if user.is_authenticated and user.profile.profile_picture %}
-                    <!-- Set the image size specifically to avoid the border growing -->
                     <img class="w-20 h-20 object-cover rounded-full ring-1 ring-gray-300 dark:ring-gray-500"
                         src="{{ user.profile.profile_picture.url }}">
                     {% else %}
@@ -90,9 +83,7 @@
         </div>
     </div>
 
-    <!-- Bottom Navigation Menu -->
     <div class="btm-nav h-16 bg-dark text-white">
-        <!-- Calendar Button -->
         <a href="/eventcalendar" class="flex justify-center items-center">
             <button>
                 <svg class="w-10 h-10" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
@@ -104,7 +95,6 @@
             </button>
         </a>
 
-        <!--Reminder Button-->
         <a href="/recommendation" class="flex justify-center items-center">
             <button>
                 <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -116,7 +106,6 @@
             </button>
         </a>
 
-        <!-- Home Button -->
         <a href="/" class="flex justify-center items-center">
             <button>
                 <svg class="w-15 h-15 text-gray-800 dark:text-white" aria-hidden="true"
@@ -128,16 +117,16 @@
             </button>
         </a>
 
-        <!-- Saved Button -->
-        <button>
-            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                <path
-                    d="M7.833 2c-.507 0-.98.216-1.318.576A1.92 1.92 0 0 0 6 3.89V21a1 1 0 0 0 1.625.78L12 18.28l4.375 3.5A1 1 0 0 0 18 21V3.889c0-.481-.178-.954-.515-1.313A1.808 1.808 0 0 0 16.167 2H7.833Z" />
-            </svg>
-        </button>
+        <a href="/saved" class="flex justify-center items-center">
+            <button>
+                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                    width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                        d="M7.833 2c-.507 0-.98.216-1.318.576A1.92 1.92 0 0 0 6 3.89V21a1 1 0 0 0 1.625.78L12 18.28l4.375 3.5A1 1 0 0 0 18 21V3.889c0-.481-.178-.954-.515-1.313A1.808 1.808 0 0 0 16.167 2H7.833Z" />
+                </svg>
+            </button>
+        </a>
 
-        <!-- Settings Dropdown -->
         <div class="group relative">
             <button onclick="handleSettingsClick()" class="focus:outline-none">
                 <svg class="w-10 h-10 text-gray-800 dark:text-white" aria-hidden="true"
@@ -158,17 +147,13 @@
 
     </div>
 
-    <!-- Include the authmodal.html modal -->
     {% include "authmodal.html" %}
 
-    <!-- JavaScript to handle modal -->
     <script>
         function handleSettingsClick() {
-            // Check if the user is authenticated via the data attribute
             const isAuthenticated = document.body.dataset.userAuthenticated === "true";
 
             if (!isAuthenticated) {
-                // If not authenticated, open the auth modal
                 openAuthModal();
             }
         }

@@ -6,7 +6,6 @@
 <body class="imnida" style="background: linear-gradient(to bottom, #287dec, #e5d3be); min-height: 100vh;">
     <div class="main-content relative py-10 px-4" style="padding-top: 120px;">
         <div class="container mx-auto">
-            <!-- Header Section -->
             <div class="text-center mb-6">
                 <h1 class="text-4xl font-extrabold text-white tracking-wide drop-shadow-md">
                     🎄 Location Recommendations 🎁
@@ -16,31 +15,10 @@
                 </h2>
             </div>
 
-            <!-- Current Location Input -->
-            <div class="flex justify-center mb-6">
-                <div class="flex items-center w-full max-w-2xl bg-white rounded-full shadow-md overflow-hidden">
-                    <input type="text" id="current-location"
-                        placeholder="Enter your current location (Latitude, Longitude)"
-                        class="flex-grow p-4 text-gray-700 focus:outline-none" />
-                    <button id="locate-me"
-                        class="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-3 transition">
-                        Use My Location
-                    </button>
-                </div>
-            </div>
-
-            <!-- Search Bar -->
-            <div class="flex justify-center mb-8">
-                <input type="text" id="location-search" placeholder="Search for locations..."
-                    class="w-full max-w-2xl p-4 text-gray-700 rounded-full shadow-md focus:outline-none focus:ring focus:ring-red-300" />
-            </div>
-
-            <!-- Locations Grid -->
             <div id="locations-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {% for location in locations %}
                 <div class="location-card p-4 bg-white shadow-md rounded-lg hover:shadow-lg transition"
                     data-name="{{ location.name|lower }}" data-description="{{ location.description|lower }}">
-                    <!-- Image Section -->
                     {% if location.image %}
                     <img src="{{ location.image.url }}" alt="{{ location.name }}"
                         class="w-full h-32 object-cover rounded-lg mb-4">
@@ -50,7 +28,6 @@
                     </div>
                     {% endif %}
 
-                    <!-- Location Details -->
                     <h3 class="text-xl font-bold text-red-500 mb-2">
                         {{ location.name }}
                     </h3>
@@ -69,8 +46,8 @@
                 </div>
                 {% empty %}
                 <div class="col-span-full text-center">
-                    <p class="text-red-500 text-lg font-semibold">
-                        🎅 No locations found matching your search. Try again! 🤶
+                    <p class="text-red-700 text-lg font-semibold">
+                        🎅 No locations found in here. Try again later! 🤶
                     </p>
                 </div>
                 {% endfor %}
@@ -79,7 +56,6 @@
     </div>
 
     <script>
-        // Dynamic Search Functionality
         document.getElementById('location-search').addEventListener('input', function () {
             const searchTerm = this.value.toLowerCase();
             const locationCards = document.querySelectorAll('.location-card');
@@ -96,7 +72,6 @@
             });
         });
 
-        // Geolocation Button
         document.getElementById('locate-me').addEventListener('click', function () {
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition(function (position) {
@@ -104,7 +79,6 @@
                     const longitude = position.coords.longitude;
                     document.getElementById('current-location').value = `${latitude}, ${longitude}`;
 
-                    // Filter locations within a 1000-meter radius
                     filterLocationsByProximity(latitude, longitude);
                 }, function (error) {
                     alert('Error getting location: ' + error.message);
@@ -114,7 +88,6 @@
             }
         });
 
-        // Function to filter locations by proximity
         function filterLocationsByProximity(currentLat, currentLon) {
             const locationCards = document.querySelectorAll('.location-card');
 
@@ -122,8 +95,7 @@
                 const lat = parseFloat(card.querySelector('li:nth-child(2)').textContent.split(': ')[1]);
                 const lon = parseFloat(card.querySelector('li:nth-child(1)').textContent.split(': ')[1]);
 
-                // Haversine formula to calculate distance
-                const R = 6371; // Radius of the Earth in kilometers
+                const R = 6371;
                 const dLat = (lat - currentLat) * Math.PI / 180;
                 const dLon = (lon - currentLon) * Math.PI / 180;
                 const a =
@@ -131,9 +103,8 @@
                     Math.cos(currentLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
                     Math.sin(dLon / 2) * Math.sin(dLon / 2);
                 const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                const distance = R * c * 1000; // Convert to meters
+                const distance = R * c * 1000;
 
-                // Show only locations within 1000 meters
                 if (distance <= 1000) {
                     card.style.display = 'block';
                 } else {

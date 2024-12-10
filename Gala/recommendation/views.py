@@ -4,6 +4,8 @@ from .models import Location
 from .forms import LocationForm
 from django.views.generic import ListView
 from .utils import get_weather_data, get_address_from_coordinates
+from django.views.decorators.csrf import csrf_exempt
+
 
 def admin_location_view(request):
     locations = Location.objects.all()
@@ -16,7 +18,7 @@ def admin_location_view(request):
             "latitude": location.latitude,
             "image_url": location.image.url if location.image else None,
             "address": location.address,
-            "weather": get_weather_data(location.latitude, location.longitude, "7334d2a0bf94493b8b894516240812"),  # Fetch real-time weather
+            "weather": get_weather_data(location.latitude, location.longitude, "7334d2a0bf94493b8b894516240812"), 
         }
         for location in locations
     ]
@@ -28,19 +30,16 @@ def add_location(request):
         if form.is_valid():
             location = form.save(commit=False)
 
-            # Fetch the address based on latitude and longitude
             if location.latitude and location.longitude:
-                api_key = "ge-ea5a9c6688e4ac48"  # Replace with your actual API key
+                api_key = "ge-ea5a9c6688e4ac48"  
                 location.address = get_address_from_coordinates(location.latitude, location.longitude, api_key)
             
-            # Fetch and save weather data
             if location.latitude and location.longitude:
                 weather = get_weather_data(location.latitude, location.longitude, "7334d2a0bf94493b8b894516240812")
-                location.weather = weather  # Save weather data to the database
+                location.weather = weather  
             
             location.save()
 
-            # Return a JSON response with the newly added location data
             return JsonResponse({
                 'status': 'success',
                 'location': {
@@ -64,19 +63,16 @@ def edit_location(request, pk):
         if form.is_valid():
             location = form.save(commit=False)
 
-            # Update the address based on latitude and longitude
             if location.latitude and location.longitude:
-                api_key = "ge-ea5a9c6688e4ac48"  # Replace with your actual API key
+                api_key = "ge-ea5a9c6688e4ac48" 
                 location.address = get_address_from_coordinates(location.latitude, location.longitude, api_key)
 
-            # Update weather data if latitude or longitude changes
             if location.latitude and location.longitude:
                 weather = get_weather_data(location.latitude, location.longitude, "7334d2a0bf94493b8b894516240812")
-                location.weather = weather  # Save updated weather data to the database
+                location.weather = weather  
             
             location.save()
 
-            # Return a JSON response with the updated location data
             return JsonResponse({
                 'status': 'success',
                 'location': {
@@ -85,7 +81,7 @@ def edit_location(request, pk):
                     'description': location.description,
                     'longitude': location.longitude,
                     'latitude': location.latitude,
-                    'weather': location.weather,  # Weather is now updated
+                    'weather': location.weather,  
                     'image_url': location.image.url if location.image else None,
                     'address': location.address,
                 }
@@ -105,3 +101,18 @@ def recommendation_view(request):
     query = request.GET.get('search', '')
     locations = Location.objects.filter(name__icontains=query) if query else Location.objects.all()
     return render(request, 'recommendation.html', {'locations': locations, 'query': query})
+
+def toggle_save(request, object_id, object_type):
+    if request.method == 'POST':
+        if object_type == 'reminder':
+            obj = get_object_or_404(EventReminder, pk=object_id)
+        elif object_type == 'location':
+            obj = get_object_or_404(Location, pk=object_id)
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid object type'}, status=400)
+
+        obj.is_saved = not obj.is_saved
+        obj.save()
+
+        return JsonResponse({'success': True, 'is_saved': obj.is_saved})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)

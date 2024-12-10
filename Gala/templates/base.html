@@ -3,8 +3,6 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<!-- In base.html -->
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,16 +10,12 @@
     <title>{% block title %}GALA{% endblock %}</title>
     <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/x-icon">
 
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- FullCalendar CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" rel="stylesheet">
 
-    <!-- FullCalendar JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
@@ -32,7 +26,7 @@
                 extend: {
                     colors: {
                         primary: '#00386d',
-                        dark: '#00386d', /* Unified color */
+                        dark: '#00386d',
                     },
                 },
             },
@@ -41,10 +35,8 @@
 </head>
 
 <body class="min-h-screen">
-    <!-- Include Suggestions Modal -->
     {% include 'menu.html' %}
 
-    <!-- Content Section where specific page content will be placed -->
     <div class="relative">
         {% block content %}{% endblock %}
     </div>
@@ -81,12 +73,66 @@
     });
 
     function confirmUpdate() {
-        const form = document.getElementById('update-account-form'); // Targeting the form explicitly
+        const form = document.getElementById('update-account-form');
         if (form) {
-            form.submit(); // Submit the form for update
+            form.submit();
         } else {
             console.error("Form not found.");
         }
     }
+
+    function toggleSave(objectId, objectType, button) {
+        console.log('toggleSave called with:', { objectId, objectType });
+
+        if (!objectId || !objectType) {
+            console.error('Invalid object ID or type:', objectId, objectType);
+            return;
+        }
+
+        fetch(`/toggle-save/${objectType}/${objectId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Server response:', data);
+                if (data.success) {
+                    const isSaved = data.is_saved;
+                    console.log('Save toggled, new state:', isSaved);
+
+                    const parent = button.closest('.suggestion-item');
+                    if (parent) {
+                        const computedStyle = window.getComputedStyle(parent);
+                        const dynamicColor = computedStyle.backgroundColor;
+
+                        const savedSVG = button.querySelector('.saved-svg path');
+                        const unsavedSVG = button.querySelector('.unsaved-svg path');
+
+                        if (isSaved) {
+                            button.querySelector('.saved-svg').classList.remove('hidden');
+                            button.querySelector('.unsaved-svg').classList.add('hidden');
+                            if (savedSVG) savedSVG.setAttribute('fill', dynamicColor);
+                        } else {
+                            button.querySelector('.saved-svg').classList.add('hidden');
+                            button.querySelector('.unsaved-svg').classList.remove('hidden');
+                            if (unsavedSVG) {
+                                unsavedSVG.setAttribute('stroke', dynamicColor);
+                                unsavedSVG.setAttribute('fill', 'none');
+                            }
+                        }
+                    }
+                    window.location.reload();
+                } else {
+                    console.error('Error toggling save state:', data.error);
+                }
+            })
+            .catch((error) => console.error('Error:', error));
+    }
+
+
+
 </script>
 {% endblock %}

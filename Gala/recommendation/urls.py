@@ -10,7 +10,9 @@ urlpatterns = [
     path('add-location/', views.add_location, name='add_location'),
     path('edit-location/<int:pk>/', views.edit_location, name='edit_location'),
     path('delete-location/<int:pk>/', views.delete_location, name='delete_location'),
+    path('toggle-save/<str:object_type>/<int:object_id>/', views.toggle_save, name='toggle-save'),
+
 ]
-# Serve media files during development
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

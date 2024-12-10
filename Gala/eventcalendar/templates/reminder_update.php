@@ -16,13 +16,11 @@
                     <label for="id_image"
                         class="event-picture cursor-pointer flex flex-col items-center justify-center">
                         <div class="relative">
-                            <!-- Image Preview -->
                             <img id="imagePreview"
                                 src="{% if reminder.image %}{{ reminder.image.url }}{% else %}# {% endif %}"
                                 alt="Preview"
                                 class="object-cover rounded-lg w-[500px] h-auto max-h-[700px] {% if not reminder.image %}hidden{% endif %}">
 
-                            <!-- Placeholder (shown when no image is selected) -->
                             {% if not reminder.image %}
                             <div id="placeholder" class="flex flex-col items-center">
                                 <p class="text-white text-center">Click to upload an image</p>
@@ -165,8 +163,8 @@ function previewImage(event) {
         const reader = new FileReader();
         reader.onload = function(e) {
             preview.src = e.target.result;
-            preview.classList.remove('hidden'); // Show the image preview
-            placeholder?.classList.add('hidden'); // Hide the placeholder
+            preview.classList.remove('hidden'); 
+            placeholder?.classList.add('hidden'); 
         };
         reader.readAsDataURL(fileInput.files[0]);
     }

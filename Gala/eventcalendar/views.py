@@ -1,6 +1,7 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.views.generic import UpdateView
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 from django.forms import ValidationError
 from django.urls import reverse_lazy
 
@@ -14,23 +15,14 @@ from math import sin, cos, sqrt, atan2, radians
 class ReminderCreateView(CreateView):
     model = EventReminder
     template_name = 'reminder_creater.html'
-    fields = ['description', 'start_time', 'end_time', 'date', 'longitude', 'latitude', 'image']  # Include 'image'
+    fields = ['description', 'start_time', 'end_time', 'date', 'longitude', 'latitude', 'image'] 
     success_url = reverse_lazy('reminder-list')
 
     def form_valid(self, form):
-        # Automatically fetch the address before saving
         if form.instance.latitude and form.instance.longitude:
-            api_key = "ge-ea5a9c6688e4ac48"  # Replace with your actual API key
+            api_key = "ge-ea5a9c6688e4ac48"  
             form.instance.address = get_address_from_coordinates(form.instance.latitude, form.instance.longitude, api_key)
         return super().form_valid(form)
-    
-def toggle_save(request, event_id):
-    if request.method == 'POST':
-        event = get_object_or_404(EventReminder, pk=event_id)
-        event.is_saved = not event.is_saved  # Toggle the is_saved state
-        event.save()
-        return JsonResponse({'success': True, 'is_saved': event.is_saved})
-    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
 class ReminderUpdateView(UpdateView):
     model = EventReminder
@@ -39,7 +31,6 @@ class ReminderUpdateView(UpdateView):
     success_url = reverse_lazy('reminder-list')
 
     def form_valid(self, form):
-        # Check if all required fields are filled out
         if not form.cleaned_data.get('description'):
             form.add_error('description', 'Description is required.')
 
@@ -59,14 +50,12 @@ class ReminderUpdateView(UpdateView):
             api_key = "ge-ea5a9c6688e4ac48"
             form.instance.address = get_address_from_coordinates(form.instance.latitude, form.instance.longitude, api_key)
 
-        # If there are errors, return to form invalid view
         if form.errors:
             return self.form_invalid(form)
 
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        # Log any errors for debugging purposes (optional)
         for field, error in form.errors.items():
             print(f"Error in field '{field}': {error}")
 
@@ -74,7 +63,7 @@ class ReminderUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['reminder'] = self.object  # Pass the reminder instance to the template
+        context['reminder'] = self.object 
         return context
 
 class ReminderDeleteView(DeleteView):
@@ -106,7 +95,6 @@ class ReminderListView(ListView):
         calendar_events = []
 
         for reminder in reminders:
-            # Calculate distance if user location is available
             distance = None
             if user_latitude and user_longitude and reminder.latitude and reminder.longitude:
                 distance = calculate_distance(
@@ -114,17 +102,14 @@ class ReminderListView(ListView):
                     float(reminder.latitude), float(reminder.longitude)
                 )
 
-            # Determine start and end datetime of the reminder
             reminder_start_datetime = datetime.combine(reminder.date, reminder.start_time)
             reminder_end_datetime = (
                 datetime.combine(reminder.date, reminder.end_time) if reminder.end_time else None
             )
 
-            # Determine reminder status
             is_happening = reminder_start_datetime <= now <= reminder_end_datetime if reminder_end_datetime else False
             is_missed = now > reminder_end_datetime if reminder_end_datetime else False
 
-            # Calculate time remaining
             if is_happening:
                 formatted_time_remaining = "Happening Now"
             elif not is_missed:
@@ -145,16 +130,14 @@ class ReminderListView(ListView):
             else:
                 formatted_time_remaining = "Missed"
 
-            # Ensure no conflicting statuses
             if is_happening and is_missed:
                 raise ValueError("An event cannot be both 'Happening' and 'Missed' at the same time.")
 
-            # Store the reminder data for the list view
             reminder_data = {
-                "id": reminder.event_reminder_id,
+                "id": reminder.id,
                 "title": reminder.description,
-                "date": reminder.date.strftime("%Y-%m-%d"),  # Format date as YYYY-MM-DD
-                "start": reminder.start_time.strftime("%H:%M") if reminder.start_time else None,  # Format time as HH:MM
+                "date": reminder.date.strftime("%Y-%m-%d"),  
+                "start": reminder.start_time.strftime("%H:%M") if reminder.start_time else None, 
                 "end": reminder.end_time.strftime("%H:%M") if reminder.end_time else None,
                 "longitude": reminder.longitude,
                 "latitude": reminder.latitude,
@@ -173,26 +156,23 @@ class ReminderListView(ListView):
                 ),
             }
 
-            # Append to the reminders list
             sorted_reminders.append(reminder_data)
 
-            # Format reminder for the calendar
             calendar_events.append({
-                "id": reminder.event_reminder_id,
+                "id": reminder.id,
                 "title": reminder.description,
                 "longitude": reminder.longitude,
                 "latitude": reminder.latitude,
                 "start": f"{reminder.date}T{reminder.start_time}",
                 "end": f"{reminder.date}T{reminder.end_time}" if reminder.end_time else None,
                 "color": (
-                    "#28a745" if is_happening else  # Green for happening
-                    "#1b2024" if is_missed else  # Red for missed
-                    "#00386d"  # Default blue for upcoming
+                    "#28a745" if is_happening else  
+                    "#1b2024" if is_missed else  
+                    "#00386d"  
                 ),
                 "textColor": "#ffffff",
             })
 
-        # Sort logic: prioritize happening events, then future reminders by time, and then by distance
         sorted_reminders.sort(
             key=lambda r: (
                 0 if r["is_happening"] else (r["time_remaining_value"] if not r["is_overdue"] else float("inf")),
@@ -201,5 +181,21 @@ class ReminderListView(ListView):
         )
 
         context["reminders"] = sorted_reminders
-        context["events"] = calendar_events  # Include events for the calendar
+        context["events"] = calendar_events  
         return context
+
+@csrf_exempt
+def toggle_save(request, object_id, object_type):
+    if request.method == 'POST':
+        if object_type == 'reminder':
+            obj = get_object_or_404(EventReminder, pk=object_id)
+        elif object_type == 'location':
+            obj = get_object_or_404(Location, pk=object_id)
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid object type'}, status=400)
+
+        obj.is_saved = not obj.is_saved
+        obj.save()
+
+        return JsonResponse({'success': True, 'is_saved': obj.is_saved})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)

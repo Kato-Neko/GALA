@@ -5,8 +5,8 @@ from . import views
 urlpatterns = [
     path('', ReminderListView.as_view(), name='reminder-list'),
     path('create/', ReminderCreateView.as_view(), name='reminder-create'),
-    path('update/<int:pk>/', ReminderUpdateView.as_view(), name='reminder-update'),  # Add this
+    path('update/<int:pk>/', ReminderUpdateView.as_view(), name='reminder-update'),
     path('delete/<int:pk>/', ReminderDeleteView.as_view(), name='reminder-delete'),
-    
-    path('toggle-save/<int:event_id>/', views.toggle_save, name='toggle_save'),
+    path('toggle-save/<str:object_type>/<int:object_id>/', views.toggle_save, name='toggle-save'),
+
 ]

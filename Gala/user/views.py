@@ -158,24 +158,21 @@ def home(request):
     reminders = EventReminder.objects.all()
     locations = Location.objects.all()
 
-    search_query = request.GET.get('q', '').strip()  # 'q' is the query parameter for the search
+    search_query = request.GET.get('q', '').strip()
 
-    # Filter reminders and locations by the search query
     if search_query:
         reminders = reminders.filter(description__icontains=search_query)
         locations = locations.filter(name__icontains=search_query)
 
-    # Retrieve user's current location from the session
     user_latitude = request.session.get('user_latitude')
     user_longitude = request.session.get('user_longitude')
 
     now = datetime.now()
-    combined_list = []  # For reminders/locations within 5km
-    all_pins = []       # For all reminders/locations (no distance restriction)
+    combined_list = []  
+    all_pins = []     
 
-    # Process reminders
     for reminder in reminders:
-        print(f"Reminder ID: {reminder.event_reminder_id}")  # Check if this ID exists
+        print(f"Reminder ID: {reminder.id}")  
 
         start_time = reminder.start_time.strftime("%I:%M %p") if reminder.start_time else ""
         end_time = reminder.end_time.strftime("%I:%M %p") if reminder.end_time else None
@@ -187,7 +184,6 @@ def home(request):
                 float(reminder.latitude), float(reminder.longitude)
             )
 
-        # Determine reminder status
         reminder_start_datetime = datetime.combine(reminder.date, reminder.start_time)
         reminder_end_datetime = (
             datetime.combine(reminder.date, reminder.end_time) if reminder.end_time else None
@@ -195,10 +191,10 @@ def home(request):
         is_happening = reminder_start_datetime <= now <= reminder_end_datetime if reminder_end_datetime else False
         is_missed = now > reminder_end_datetime if reminder_end_datetime else False
 
-        # Add all reminders to all_pins, marking those outside 5km as transparent
+        
         all_pins.append({
             'type': 'reminder',
-            'event_reminder_id': reminder.event_reminder_id,  # Ensure this is added
+            'id': reminder.id,  
             'is_saved': reminder.is_saved,
             'title': reminder.description,
             'start': f"{reminder.date.strftime('%B %d, %Y')} {start_time}",
@@ -209,11 +205,10 @@ def home(request):
             'image': reminder.image.url if reminder.image else "",
             'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
             'is_happening': is_happening,
-            'is_within_5km': distance and distance <= 5000  # Add this flag
+            'is_within_5km': distance and distance <= 5000  
         })
 
 
-        # Include only upcoming or happening reminders within 5km
         if distance and distance <= 5000 and not is_missed:
             if is_happening:
                 formatted_time_remaining = "Happening Now"
@@ -235,8 +230,8 @@ def home(request):
 
             combined_list.append({
                 'type': 'reminder',
-                'event_reminder_id': reminder.event_reminder_id,  # Ensure this is added
-                'is_saved': reminder.is_saved,  # Include this
+                'id': reminder.id,  
+                'is_saved': reminder.is_saved, 
                 'title': reminder.description,
                 'start': f"{reminder.date.strftime('%B %d, %Y')} {start_time}",
                 'end': f"{reminder.date.strftime('%B %d, %Y')} {end_time}" if end_time else None,
@@ -249,10 +244,8 @@ def home(request):
                 'is_happening': is_happening,
             })
 
-    # Sort reminders by time first, then by distance
     combined_list.sort(key=lambda x: ('Happening Now' not in x['time_remaining'], x['time_remaining'], x['distance']))
 
-    # Process locations
     for location in locations:
         if location.latitude is not None and location.longitude is not None:
             distance = None
@@ -263,10 +256,10 @@ def home(request):
                     float(location.latitude), float(location.longitude)
                 )
 
-            # Add to all_pins (for map display)
             all_pins.append({
                 'type': 'location',
                 'name': location.name,
+                "is_saved": location.is_saved,
                 'description': location.description,
                 'latitude': location.latitude,
                 'longitude': location.longitude,
@@ -274,14 +267,15 @@ def home(request):
                 'image': location.image.url if location.image else "",
                 'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
                 'weather': location.weather,
-                'is_within_5km': distance and distance <= 5000  # Add this flag
+                'is_within_5km': distance and distance <= 5000 
             })
 
-            # Include only locations within 5km in combined_list
             if distance and distance <= 5000:
                 combined_list.append({
                     'type': 'location',
+                    'id': location.id,
                     'name': location.name,
+                    "is_saved": location.is_saved,
                     'description': location.description,
                     'latitude': location.latitude,
                     'longitude': location.longitude,
@@ -291,7 +285,6 @@ def home(request):
                     'weather': location.weather,
                 })
 
-    # Serialize the combined lists for the template
     combined_list_json = json.dumps(combined_list, cls=DjangoJSONEncoder)
     all_pins_json = json.dumps(all_pins, cls=DjangoJSONEncoder)
 
@@ -305,14 +298,12 @@ def search(request):
     query = request.GET.get('q', '').strip()
     results = []
 
-    # Get user's current location from the session
     user_latitude = request.session.get('user_latitude')
     user_longitude = request.session.get('user_longitude')
 
     if query:
         now = datetime.now()
 
-        # Search in EventReminder and exclude missed reminders
         reminders = EventReminder.objects.filter(
             description__icontains=query
         ).exclude(
@@ -320,10 +311,8 @@ def search(request):
             end_time__lt=now
         )
 
-        # Search in Location models
         locations = Location.objects.filter(name__icontains=query)
 
-        # Add reminders to results
         for reminder in reminders:
             distance = None
             if user_latitude and user_longitude and reminder.latitude and reminder.longitude:
@@ -338,10 +327,9 @@ def search(request):
                 'longitude': reminder.longitude,
                 'address': reminder.address,
                 'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
-                'url': f"/reminder/{reminder.event_reminder_id}",  # Adjust the URL as needed
+                'url': f"/reminder/{reminder.id}",  
             })
 
-        # Add locations to results
         for location in locations:
             distance = None
             if user_latitude and user_longitude and location.latitude and location.longitude:
@@ -356,16 +344,34 @@ def search(request):
                 'longitude': location.longitude,
                 'address': location.address,
                 'distance': f"{int(distance)} meters" if distance and distance < 1000 else f"{distance / 1000:.2f} km" if distance else "Unknown",
-                'url': f"/location/{location.id}",  # Adjust the URL as needed
+                'url': f"/location/{location.id}",  
             })
 
     return JsonResponse(results, safe=False)
 
 @csrf_exempt
-def toggle_save(request, event_id):
+def toggle_save(request, object_id, object_type):
     if request.method == 'POST':
-        event = get_object_or_404(EventReminder, pk=event_id)
-        event.is_saved = not event.is_saved  # Toggle the is_saved state
-        event.save()
-        return JsonResponse({'success': True, 'is_saved': event.is_saved})
+        if object_type == 'reminder':
+            obj = get_object_or_404(EventReminder, pk=object_id)
+        elif object_type == 'location':
+            obj = get_object_or_404(Location, pk=object_id)
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid object type'}, status=400)
+        
+        obj.is_saved = not obj.is_saved  
+        obj.save()
+        
+        return JsonResponse({'success': True, 'is_saved': obj.is_saved})
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
+
+def saved_posts_view(request):
+    saved_reminders = EventReminder.objects.filter(is_saved=True)
+    saved_locations = Location.objects.filter(is_saved=True)
+    
+    context = {
+        'saved_reminders': saved_reminders,
+        'saved_locations': saved_locations,
+    }
+
+    return render(request, 'saved.php', context)
